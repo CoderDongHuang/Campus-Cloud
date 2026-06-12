@@ -1,0 +1,167 @@
+# ==================== 校享云 - 本地开发环境 ====================
+# 启动: docker-compose up -d
+# 停止: docker-compose down
+# 清理数据: docker-compose down -v
+
+version: "3.8"
+
+services:
+  # ==================== MySQL 8.0 ====================
+  mysql:
+    image: mysql:8.0.33
+    container_name: campus-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./campus-scripts/sql:/docker-entrypoint-initdb.d   # 自动执行建库脚本
+      - mysql-data:/var/lib/mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=500
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  # ==================== Redis 7.2 ====================
+  redis:
+    image: redis:7.2-alpine
+    container_name: campus-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+
+  # ==================== RabbitMQ 3.12 ====================
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: campus-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # 管理界面 http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      retries: 5
+
+  # ==================== Nacos 2.3 ====================
+  nacos:
+    image: nacos/nacos-server:v2.3.1
+    container_name: campus-nacos
+    restart: unless-stopped
+    ports:
+      - "8848:8848"     # 控制台 http://localhost:8848/nacos
+      - "9848:9848"     # gRPC
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/v1/console/health/readiness"]
+      interval: 15s
+      retries: 10
+
+  # ==================== MinIO 对象存储 ====================
+  minio:
+    image: minio/minio:latest
+    container_name: campus-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"     # API
+      - "9001:9001"     # 控制台 http://localhost:9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASS: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      retries: 5
+
+  # ==================== MongoDB 6.0（IM 消息存储） ====================
+  mongodb:
+    image: mongo:6.0
+    container_name: campus-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: campus_im
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+
+  # ==================== Elasticsearch 8.11（全文搜索） ====================
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: campus-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 15s
+      retries: 10
+
+  # ==================== Canal Server（可选，阶段9才用） ====================
+  # canal-server:
+  #   image: canal/canal-server:v1.1.7
+  #   container_name: campus-canal
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11111:11111"
+  #   environment:
+  #     CANAL_ADMIN_MANAGER: ""
+  #     CANAL_IP: canal-server
+  #     CANAL_PORT: 11111
+  #   depends_on:
+  #     - mysql
+  #     - rabbitmq
+  #   volumes:
+  #     - ./campus-scripts/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+
+# ==================== 数据卷 ====================
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  minio-data:
+  mongodb-data:
+  es-data:
