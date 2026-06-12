@@ -12,14 +12,25 @@
     <name>校享云 - ShareCampus Cloud</name>
     <description>高校智慧后勤与生活服务平台 - 后端微服务</description>
 
-    <!-- ==================== 子模块（按开发进度逐个添加） ==================== -->
-    <!--
+    <!-- ==================== 子模块 ==================== -->
     <modules>
         <module>campus-common</module>
         <module>campus-gateway</module>
-        ...逐个添加...
+        <module>campus-auth</module>
+        <module>campus-user</module>
+        <module>campus-product</module>
+        <module>campus-order</module>
+        <module>campus-payment</module>
+        <module>campus-coupon</module>
+        <module>campus-settlement</module>
+        <module>campus-tenant</module>
+        <module>campus-search</module>
+        <module>campus-im</module>
+        <module>campus-notify</module>
+        <module>campus-review</module>
+        <module>campus-file</module>
+        <module>campus-data</module>
     </modules>
-    -->
 
     <!-- ==================== 版本统一管理 ==================== -->
     <properties>
