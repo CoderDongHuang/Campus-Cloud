@@ -1,0 +1,18 @@
+# ==================== Gateway 启动配置 ====================
+# bootstrap.yml 在 application.yml 之前加载，用于 Nacos 配置中心连接
+spring:
+  application:
+    name: campus-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: campus-cloud
+      config:
+        server-addr: localhost:8848
+        namespace: campus-cloud
+        file-extension: yaml
+        shared-configs:
+          - data-id: campus-common.yaml
+            group: DEFAULT_GROUP
+            refresh: true
