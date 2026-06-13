@@ -11,6 +11,7 @@
     <artifactId>common-mybatis</artifactId>
     <dependencies>
         <dependency><groupId>com.sharecampus</groupId><artifactId>common-core</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>com.sharecampus</groupId><artifactId>common-security</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>com.baomidou</groupId><artifactId>mybatis-plus-spring-boot3-starter</artifactId></dependency>
         <dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId></dependency>
         <dependency><groupId>com.alibaba</groupId><artifactId>druid-spring-boot-3-starter</artifactId></dependency>

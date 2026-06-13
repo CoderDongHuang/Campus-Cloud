@@ -1,0 +1,2 @@
+com.sharecampus.common.mybatis.MybatisPlusConfig
+com.sharecampus.common.mybatis.AutoFillMetaObjectHandler
