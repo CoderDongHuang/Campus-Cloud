@@ -48,7 +48,7 @@
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <shardingsphere.version>5.4.1</shardingsphere.version>
         <druid.version>1.2.20</druid.version>
-        <mysql-connector.version>8.0.33</mysql-connector.version>
+        <mysql-connector.version>8.2.0</mysql-connector.version>
 
         <!-- 缓存 & 锁 -->
         <redisson.version>3.27.2</redisson.version>
