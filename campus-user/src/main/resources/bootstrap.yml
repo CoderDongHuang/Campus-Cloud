@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: campus-user
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: campus-cloud
+      config:
+        server-addr: localhost:8848
+        namespace: campus-cloud
+        file-extension: yaml
+        shared-configs:
+          - data-id: campus-common.yaml
+            group: DEFAULT_GROUP
+            refresh: true
