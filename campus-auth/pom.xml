@@ -42,6 +42,23 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+        <!-- Redis（验证码 + Token 黑名单） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- common-security（JWT + UserContext） -->
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- common-mybatis（MyBatis-Plus + BaseEntity + 租户隔离） -->
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-mybatis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Knife4j API 文档 -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
