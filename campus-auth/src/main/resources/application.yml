@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/campus_user?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: ***REMOVED***
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 验证码配置
+campus:
+  sms:
+    code-expire: 300          # 验证码 5 分钟过期
+    resend-interval: 60       # 重发间隔 60 秒
