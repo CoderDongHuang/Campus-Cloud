@@ -1,0 +1,24 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/campus_payment?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: ***REMOVED***
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+# Mock 支付模式（开发环境）
+campus:
+  payment:
+    mock: true
