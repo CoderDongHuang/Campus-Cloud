@@ -42,7 +42,16 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
-        <!-- Knife4j API 文档 -->
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-mybatis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
