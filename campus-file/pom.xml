@@ -38,7 +38,16 @@
             <artifactId>minio</artifactId>
             <version>8.5.7</version>
         </dependency>
-        <!-- Knife4j -->
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sharecampus</groupId>
+            <artifactId>common-mybatis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
