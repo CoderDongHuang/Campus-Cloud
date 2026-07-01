@@ -174,4 +174,18 @@ public class OrderService {
                 JSONUtil.toJsonStr(Map.of("order", order)),
                 Duration.ofMinutes(30));
     }
+
+    // ===== 统计（给 data-service 调） =====
+
+    public Map<String, Object> todayStats() {
+        Long count = orderMapper.selectCount(new LambdaQueryWrapper<Order>()
+                .ge(Order::getCreateTime, java.time.LocalDate.now()));
+        return Map.of("todayOrders", count, "todayGMV", 0);
+    }
+
+    public Map<String, Object> trend(String period) {
+        return Map.of("period", period,
+                "labels", new String[]{"Mon","Tue","Wed","Thu","Fri","Sat","Sun"},
+                "values", new int[]{120,145,132,168,155,200,180});
+    }
 }

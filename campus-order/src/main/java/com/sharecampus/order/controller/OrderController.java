@@ -63,4 +63,15 @@ public class OrderController {
         orderService.complete(orderNo);
         return Result.success();
     }
+
+    // ===== 数据统计（给 data-service 调） =====
+    @GetMapping("/stats/today")
+    public Result<Map<String, Object>> todayStats() {
+        return Result.success(orderService.todayStats());
+    }
+
+    @GetMapping("/stats/trend")
+    public Result<Map<String, Object>> trend(@RequestParam(defaultValue = "week") String period) {
+        return Result.success(orderService.trend(period));
+    }
 }
