@@ -13,7 +13,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,11 +49,34 @@ public class SearchService {
                 .collect(Collectors.toList());
     }
 
-    /** Canal 数据同步消费者 */
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /** Canal 数据同步消费者 — 收到消息后索引到 ES */
     @RabbitListener(queues = MqConstants.DB_SYNC_PRODUCT_QUEUE)
+    @SuppressWarnings("unchecked")
     public void handleProductSync(MqMessage msg) {
-        // 简化版：收到同步消息后重新索引
-        log.debug("收到商品同步消息: {}", msg.getMessageId());
-        // 生产环境需解析 Canal JSON → 更新 ES 索引
+        try {
+            Map<String, Object> data = objectMapper.readValue(msg.getData(), Map.class);
+            String type = (String) data.getOrDefault("type", "INSERT");
+            Map<String, Object> product = (Map<String, Object>) data.get("product");
+            if (product == null) return;
+
+            String spuId = String.valueOf(product.get("id"));
+            if ("DELETE".equals(type)) {
+                esClient.delete(d -> d.index("campus_product_spu").id(spuId));
+                log.debug("ES删除商品: spuId={}", spuId);
+            } else {
+                ProductDoc doc = new ProductDoc();
+                doc.setSpuId(Long.valueOf(spuId));
+                doc.setName((String) product.get("name"));
+                doc.setDescription((String) product.get("description"));
+                doc.setStatus(1);
+                doc.setSalesCount(product.get("salesCount") != null ? ((Number) product.get("salesCount")).intValue() : 0);
+                esClient.index(i -> i.index("campus_product_spu").id(spuId).document(doc));
+                log.debug("ES索引商品: spuId={}, name={}", spuId, doc.getName());
+            }
+        } catch (Exception e) {
+            log.error("Canal同步失败: msgId={}", msg.getMessageId(), e);
+        }
     }
 }
