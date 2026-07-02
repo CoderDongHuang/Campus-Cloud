@@ -54,8 +54,9 @@ public class SettlementService {
         walletMapper.updateById(wallet);
     }
 
-    /** T+1 定时结算 — 待结算 → 可提现 */
+    /** T+1 定时结算 — 待结算 → 可提现 （每天凌晨 2 点执行） */
     @Transactional
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * ?")
     public void dailySettlement() {
         List<SettlementOrder> pendingList = settlementOrderMapper.selectList(
                 new LambdaQueryWrapper<SettlementOrder>()

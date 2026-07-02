@@ -7,6 +7,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
+@org.springframework.scheduling.annotation.EnableScheduling
 @MapperScan("com.sharecampus.settlement.mapper")
 public class CampusSettlementApplication {
     public static void main(String[] args) {
