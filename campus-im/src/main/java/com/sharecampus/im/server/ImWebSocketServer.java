@@ -65,17 +65,33 @@ public class ImWebSocketServer {
         if (workerGroup != null) workerGroup.shutdownGracefully();
     }
 
-    /** 消息处理器 */
+    /** 消息处理器 — JSON 格式: {"receiverId":10001,"content":"hello"} */
     @ChannelHandler.Sharable
     public static class ImMessageHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
+        private static final com.fasterxml.jackson.databind.ObjectMapper mapper =
+                new com.fasterxml.jackson.databind.ObjectMapper();
+
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame frame) {
-            // 简化版：收到消息 → 回显
-            ctx.writeAndFlush(new TextWebSocketFrame("{\"echo\":\"" + frame.text() + "\"}"));
+            try {
+                String payload = frame.text();
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> msg = mapper.readValue(payload, java.util.Map.class);
+                Long receiverId = msg.get("receiverId") != null ? ((Number) msg.get("receiverId")).longValue() : null;
+                if (receiverId == null) { ctx.writeAndFlush(new TextWebSocketFrame("{\"error\":\"缺少receiverId\"}")); return; }
+
+                Channel receiverChannel = USER_CHANNELS.get(receiverId);
+                if (receiverChannel != null && receiverChannel.isActive()) {
+                    receiverChannel.writeAndFlush(new TextWebSocketFrame(payload));
+                } else {
+                    ImMessageRouter.saveOffline(receiverId, payload);
+                }
+                ctx.writeAndFlush(new TextWebSocketFrame("{\"status\":\"ok\"}"));
+            } catch (Exception e) {
+                ctx.writeAndFlush(new TextWebSocketFrame("{\"error\":\"消息格式错误\"}"));
+            }
         }
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) { log.debug("连接建立: {}", ctx.channel().id()); }
-        @Override
-        public void handlerRemoved(ChannelHandlerContext ctx) { log.debug("连接断开: {}", ctx.channel().id()); }
+        @Override public void handlerAdded(ChannelHandlerContext ctx) { log.debug("连接建立: {}", ctx.channel().id()); }
+        @Override public void handlerRemoved(ChannelHandlerContext ctx) { log.debug("连接断开: {}", ctx.channel().id()); }
     }
 }
