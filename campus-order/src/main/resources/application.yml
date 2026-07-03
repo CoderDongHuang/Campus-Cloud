@@ -8,27 +8,27 @@ spring:
       ds0:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/order_db0?useSSL=false&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/order_db0?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
-        password: ***REMOVED***
+        password: 123456
       ds1:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/order_db1?useSSL=false&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/order_db1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
-        password: ***REMOVED***
+        password: 123456
       ds2:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/order_db2?useSSL=false&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/order_db2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
-        password: ***REMOVED***
+        password: 123456
       ds3:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/order_db3?useSSL=false&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/order_db3?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
-        password: ***REMOVED***
+        password: 123456
     rules:
       sharding:
         tables:
