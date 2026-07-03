@@ -1,18 +1,17 @@
 server:
-  port: 25556
+  port: 8081
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/campus_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/campus_user?useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: ***REMOVED***
     type: com.alibaba.druid.pool.DruidDataSource
   data:
     redis:
       host: localhost
       port: 6379
-      password: 123456
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
