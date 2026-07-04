@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.sharecampus.common.core.exception.BizException;
 import com.sharecampus.common.core.exception.ErrorCode;
-import com.sharecampus.common.security.UserContext;
 import com.sharecampus.user.entity.UserAddress;
 import com.sharecampus.user.entity.WorkerCertification;
 import com.sharecampus.user.mapper.UserAddressMapper;
@@ -24,8 +23,7 @@ public class UserService {
 
     // ==================== 地址管理 ====================
 
-    public List<UserAddress> listAddresses() {
-        Long userId = UserContext.getUserId();
+    public List<UserAddress> listAddresses(Long userId) {
         return addressMapper.selectList(
                 new LambdaQueryWrapper<UserAddress>()
                         .eq(UserAddress::getUserId, userId)
@@ -33,63 +31,50 @@ public class UserService {
     }
 
     @Transactional
-    public void addAddress(UserAddress address) {
-        address.setUserId(UserContext.getUserId());
-        // 如果设为默认，先清除旧默认
-        if (address.getIsDefault() == 1) {
-            clearDefaultAddress();
-        }
+    public void addAddress(UserAddress address, Long userId) {
+        address.setUserId(userId);
+        if (address.getIsDefault() == 1) clearDefaultAddress(userId);
         addressMapper.insert(address);
     }
 
     @Transactional
-    public void updateAddress(UserAddress address) {
-        if (address.getIsDefault() == 1) {
-            clearDefaultAddress();
-        }
+    public void updateAddress(UserAddress address, Long userId) {
+        if (address.getIsDefault() == 1) clearDefaultAddress(userId);
         addressMapper.updateById(address);
     }
 
-    public void deleteAddress(Long id) {
-        addressMapper.deleteById(id);
-    }
+    public void deleteAddress(Long id) { addressMapper.deleteById(id); }
 
     @Transactional
-    public void setDefault(Long id) {
-        clearDefaultAddress();
-        UserAddress address = new UserAddress();
-        address.setId(id);
-        address.setIsDefault(1);
-        addressMapper.updateById(address);
+    public void setDefault(Long id, Long userId) {
+        clearDefaultAddress(userId);
+        UserAddress a = new UserAddress(); a.setId(id); a.setIsDefault(1);
+        addressMapper.updateById(a);
     }
 
-    private void clearDefaultAddress() {
-        LambdaUpdateWrapper<UserAddress> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(UserAddress::getUserId, UserContext.getUserId())
-               .set(UserAddress::getIsDefault, 0);
-        addressMapper.update(wrapper);
+    private void clearDefaultAddress(Long userId) {
+        LambdaUpdateWrapper<UserAddress> w = new LambdaUpdateWrapper<>();
+        w.eq(UserAddress::getUserId, userId).set(UserAddress::getIsDefault, 0);
+        addressMapper.update(w);
     }
 
     // ==================== 师傅认证 ====================
 
-    public void submitCert(WorkerCertification cert) {
-        cert.setUserId(UserContext.getUserId());
-        // 检查是否已有待审核的认证
+    public void submitCert(WorkerCertification cert, Long userId) {
+        cert.setUserId(userId);
         Long count = certMapper.selectCount(
                 new LambdaQueryWrapper<WorkerCertification>()
-                        .eq(WorkerCertification::getUserId, UserContext.getUserId())
+                        .eq(WorkerCertification::getUserId, userId)
                         .eq(WorkerCertification::getStatus, 0));
-        if (count > 0) {
-            throw new BizException(ErrorCode.RATE_LIMIT.getCode(), "已有待审核的认证，请耐心等待");
-        }
+        if (count > 0) throw new BizException(ErrorCode.RATE_LIMIT.getCode(), "已有待审核的认证");
         cert.setStatus(0);
         certMapper.insert(cert);
     }
 
-    public WorkerCertification getCertStatus() {
+    public WorkerCertification getCertStatus(Long userId) {
         return certMapper.selectOne(
                 new LambdaQueryWrapper<WorkerCertification>()
-                        .eq(WorkerCertification::getUserId, UserContext.getUserId())
+                        .eq(WorkerCertification::getUserId, userId)
                         .orderByDesc(WorkerCertification::getCreateTime)
                         .last("LIMIT 1"));
     }
