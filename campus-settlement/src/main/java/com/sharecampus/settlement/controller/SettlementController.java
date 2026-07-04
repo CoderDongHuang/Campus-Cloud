@@ -33,6 +33,6 @@ public class SettlementController {
     @PostMapping("/withdraw")
     public Result<WithdrawApply> withdraw(@RequestBody Map<String, Object> body) {
         BigDecimal amount = new BigDecimal(body.get("amount").toString());
-        return Result.success(settlementService.applyWithdraw(UserContext.getUserId(), amount));
+        return Result.success(settlementService.applyWithdraw(UserContext.currentUserId(), amount));
     }
 }

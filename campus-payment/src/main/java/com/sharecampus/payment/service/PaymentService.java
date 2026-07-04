@@ -42,7 +42,7 @@ public class PaymentService {
         payOrder.setPayOrderNo(payOrderNo);
         payOrder.setOrderId(orderId);
         payOrder.setOrderNo(orderNo);
-        payOrder.setUserId(UserContext.getUserId());
+        payOrder.setUserId(UserContext.currentUserId());
         payOrder.setAmount(amount);
         payOrder.setChannel(paymentChannel.channelName());
         payOrder.setStatus("WAIT_PAY");

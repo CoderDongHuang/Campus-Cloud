@@ -23,7 +23,7 @@ public class CouponController {
     /** 抢券（高并发核心接口） */
     @PostMapping("/grab/{templateId}")
     public Result<String> grab(@PathVariable Long templateId) {
-        int result = grabService.grab(templateId, UserContext.getUserId());
+        int result = grabService.grab(templateId, UserContext.currentUserId());
         return switch (result) {
             case 1 -> Result.success("抢券成功");
             case -1 -> Result.fail(3001, "已被抢光");
@@ -35,7 +35,7 @@ public class CouponController {
     /** 普通领取 */
     @PostMapping("/receive/{templateId}")
     public Result<Void> receive(@PathVariable Long templateId) {
-        couponService.handleGrabSuccess(templateId, UserContext.getUserId());
+        couponService.handleGrabSuccess(templateId, UserContext.currentUserId());
         return Result.success();
     }
 

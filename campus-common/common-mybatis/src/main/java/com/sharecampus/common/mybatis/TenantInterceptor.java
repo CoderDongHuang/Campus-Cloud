@@ -22,7 +22,7 @@ public class TenantInterceptor implements TenantLineHandler {
 
     @Override
     public Expression getTenantId() {
-        Long tenantId = UserContext.getTenantId();
+        Long tenantId = UserContext.currentTenantId();
         if (tenantId == null) {
             tenantId = 0L; // 超管无租户时默认 0
         }

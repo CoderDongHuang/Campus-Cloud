@@ -54,7 +54,7 @@ public class OrderController {
     // ===== 师傅端 =====
     @PutMapping("/worker/orders/{orderNo}/accept")
     public Result<Void> accept(@PathVariable String orderNo) {
-        orderService.accept(orderNo, com.sharecampus.common.security.UserContext.getUserId());
+        orderService.accept(orderNo, com.sharecampus.common.security.UserContext.currentUserId());
         return Result.success();
     }
 

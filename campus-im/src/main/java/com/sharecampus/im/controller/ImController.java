@@ -25,6 +25,6 @@ public class ImController {
 
     @GetMapping("/offline-messages")
     public Result<List<String>> offline() {
-        return Result.success(imService.pullOffline(UserContext.getUserId()));
+        return Result.success(imService.pullOffline(UserContext.currentUserId()));
     }
 }

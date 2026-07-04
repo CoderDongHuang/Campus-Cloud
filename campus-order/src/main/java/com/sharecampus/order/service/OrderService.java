@@ -38,8 +38,8 @@ public class OrderService {
     /** 创建订单 */
     @Transactional
     public Order createOrder(Order order) {
-        Long userId = UserContext.getUserId();
-        Long tenantId = UserContext.getTenantId();
+        Long userId = UserContext.currentUserId();
+        Long tenantId = UserContext.currentTenantId();
         long orderId = idGenerator.nextId();
         String orderNo = idGenerator.nextOrderNo();
 
@@ -135,7 +135,7 @@ public class OrderService {
     /** 我的订单列表 */
     public List<Order> myOrders(String status, int page, int size) {
         LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<Order>()
-                .eq(Order::getUserId, UserContext.getUserId())
+                .eq(Order::getUserId, UserContext.currentUserId())
                 .eq(status != null && !status.isEmpty(), Order::getStatus, status)
                 .orderByDesc(Order::getCreateTime);
         Page<Order> p = new Page<>(page, size);

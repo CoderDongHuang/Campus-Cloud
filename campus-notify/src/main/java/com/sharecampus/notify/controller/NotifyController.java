@@ -18,6 +18,6 @@ public class NotifyController {
 
     @GetMapping("/messages")
     public Result<List<MessageRecord>> myMessages() {
-        return Result.success(notifyService.myMessages(UserContext.getUserId()));
+        return Result.success(notifyService.myMessages(UserContext.currentUserId()));
     }
 }

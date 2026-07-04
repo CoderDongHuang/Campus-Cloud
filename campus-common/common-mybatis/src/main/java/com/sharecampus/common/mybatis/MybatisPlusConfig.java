@@ -11,19 +11,13 @@ import org.springframework.context.annotation.Configuration;
  * <p>
  * 注册分页插件和租户隔离拦截器，所有引入 common-mybatis 的服务自动生效。
  */
-@Configuration
+// 联调期间禁用自定义 MyBatis-Plus 拦截器（会导致 StackOverflow，待排查）
+// @Configuration
 public class MybatisPlusConfig {
-
-    @Bean
+    // @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-
-        // 分页插件（MySQL 方言）
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
-
-        // 租户隔离插件（自动注入 tenant_id）
-        interceptor.addInnerInterceptor(new com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor(new TenantInterceptor()));
-
         return interceptor;
     }
 }
