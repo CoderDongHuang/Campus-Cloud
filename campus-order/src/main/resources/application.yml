@@ -2,67 +2,11 @@ server:
   port: 8084
 
 spring:
-  shardingsphere:
-    datasource:
-      names: ds0,ds1,ds2,ds3
-      ds0:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3307/order_db0?useSSL=false&serverTimezone=Asia/Shanghai
-        username: root
-        password: ***REMOVED***
-      ds1:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3307/order_db1?useSSL=false&serverTimezone=Asia/Shanghai
-        username: root
-        password: ***REMOVED***
-      ds2:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3307/order_db2?useSSL=false&serverTimezone=Asia/Shanghai
-        username: root
-        password: ***REMOVED***
-      ds3:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3307/order_db3?useSSL=false&serverTimezone=Asia/Shanghai
-        username: root
-        password: ***REMOVED***
-    rules:
-      sharding:
-        tables:
-          t_order:
-            actual-data-nodes: ds$->{0..3}.t_order_$->{0..15}
-            database-strategy:
-              standard:
-                sharding-column: tenant_id
-                sharding-algorithm-name: db-inline
-            table-strategy:
-              standard:
-                sharding-column: order_id
-                sharding-algorithm-name: tbl-inline
-          t_order_snapshot:
-            actual-data-nodes: ds$->{0..3}.t_order_snapshot_$->{0..15}
-            database-strategy:
-              standard:
-                sharding-column: tenant_id
-                sharding-algorithm-name: db-inline
-            table-strategy:
-              standard:
-                sharding-column: order_id
-                sharding-algorithm-name: tbl-inline
-        sharding-algorithms:
-          db-inline:
-            type: INLINE
-            props:
-              algorithm-expression: ds${tenant_id % 4}
-          tbl-inline:
-            type: INLINE
-            props:
-              algorithm-expression: t_order_${order_id % 16}
-    props:
-      sql-show: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/order_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
   data:
     redis:
       host: localhost
