@@ -110,6 +110,18 @@
                 <groupId>org.apache.shardingsphere</groupId>
                 <artifactId>shardingsphere-jdbc-core</artifactId>
                 <version>${shardingsphere.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- SnakeYAML 版本强制统一（ShardingSphere 内嵌旧版，与 Spring Boot 3 冲突） -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>2.2</version>
             </dependency>
 
             <!-- Druid 数据源 -->
@@ -235,6 +247,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <parameters>true</parameters>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
