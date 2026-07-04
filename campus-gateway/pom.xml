@@ -52,11 +52,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
-        <!-- common-security（JwtTokenProvider + UserContext） -->
+        <!-- common-security（排除 MVC，Gateway 用 WebFlux） -->
         <dependency>
             <groupId>com.sharecampus</groupId>
             <artifactId>common-security</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

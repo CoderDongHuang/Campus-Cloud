@@ -30,8 +30,10 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private final JwtTokenProvider jwtTokenProvider;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    @Value("${campus.security.white-urls}")
-    private List<String> whiteUrls;
+    private static final List<String> whiteUrls = java.util.List.of(
+        "/api/v1/auth/login", "/api/v1/auth/login/sms", "/api/v1/auth/register",
+        "/api/v1/auth/sms/send", "/api/v1/product/**", "/doc.html", "/v3/api-docs/**"
+    );
 
     public AuthGlobalFilter() {
         this.jwtTokenProvider = new JwtTokenProvider();
@@ -61,6 +63,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         // 4. 解析用户信息，注入 Header 透传给下游
         try {
             UserContext context = jwtTokenProvider.parseToken(token);
+            log.info("JWT解析成功: userId={}, tenantId={}", context.getUserId(), context.getTenantId());
             exchange = exchange.mutate()
                     .request(r -> r
                             .header("X-User-Id", String.valueOf(context.getUserId()))

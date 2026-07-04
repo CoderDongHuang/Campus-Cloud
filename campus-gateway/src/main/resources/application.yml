@@ -14,72 +14,72 @@ spring:
       routes:
         # ===== 认证服务 =====
         - id: campus-auth
-          uri: lb://campus-auth
+          uri: http://localhost:8081
           predicates:
             - Path=/api/v1/auth/**
         # ===== 用户服务 =====
         - id: campus-user
-          uri: lb://campus-user
+          uri: http://localhost:8082
           predicates:
             - Path=/api/v1/user/**
         # ===== 商品服务 =====
         - id: campus-product
-          uri: lb://campus-product
+          uri: http://localhost:8083
           predicates:
             - Path=/api/v1/product/**
         # ===== 订单服务 =====
         - id: campus-order
-          uri: lb://campus-order
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/order/**
         # ===== 支付服务 =====
         - id: campus-payment
-          uri: lb://campus-payment
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/payment/**
         # ===== 优惠券服务 =====
         - id: campus-coupon
-          uri: lb://campus-coupon
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/coupon/**
         # ===== 结算服务 =====
         - id: campus-settlement
-          uri: lb://campus-settlement
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/settlement/**
         # ===== 搜索服务 =====
         - id: campus-search
-          uri: lb://campus-search
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/search/**
         # ===== IM 服务 =====
         - id: campus-im
-          uri: lb://campus-im
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/im/**
         # ===== 通知服务 =====
         - id: campus-notify
-          uri: lb://campus-notify
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/notify/**
         # ===== 评价服务 =====
         - id: campus-review
-          uri: lb://campus-review
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/review/**
         # ===== 文件服务 =====
         - id: campus-file
-          uri: lb://campus-file
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/file/**
         # ===== 数据服务 =====
         - id: campus-data
-          uri: lb://campus-data
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/data/**
         # ===== 租户服务 =====
         - id: campus-tenant
-          uri: lb://campus-tenant
+          uri: http://localhost:8080
           predicates:
             - Path=/api/v1/tenant/**
       # CORS 全局配置
