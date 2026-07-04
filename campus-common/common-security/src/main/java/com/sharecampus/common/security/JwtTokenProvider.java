@@ -16,6 +16,7 @@ import java.util.*;
  * 负责生成 AccessToken（2h）和 RefreshToken（7d），以及 Token 解析和校验
  */
 @Slf4j
+@org.springframework.stereotype.Component
 public class JwtTokenProvider {
 
     /** 默认密钥（生产环境应从 Nacos 配置读取） */
@@ -70,12 +71,14 @@ public class JwtTokenProvider {
     /** 解析 Token 并返回 UserContext */
     public UserContext parseToken(String token) {
         Claims claims = parseClaims(token);
-        return UserContext.builder()
-                .userId(Long.valueOf(claims.getSubject()))
-                .tenantId(claims.get("tid", Long.class))
-                .userType(claims.get("typ", String.class))
-                .roles(Arrays.asList(claims.get("rol", String.class).split(",")))
-                .build();
+        log.info("JWT claims: sub={}, tid={}, typ={}, rol={}",
+                claims.getSubject(), claims.get("tid"), claims.get("typ"), claims.get("rol"));
+        UserContext ctx = new UserContext();
+        ctx.setUserId(Long.valueOf(claims.getSubject()));
+        ctx.setTenantId(claims.get("tid", Long.class));
+        ctx.setUserType(claims.get("typ", String.class));
+        ctx.setRoles(Arrays.asList(claims.get("rol", String.class).split(",")));
+        return ctx;
     }
 
     /** 获取 Token 的唯一 ID（jti），用于黑名单 */

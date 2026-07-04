@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * 其他服务引入 common-security 依赖后自动生效（spring.factories + @Configuration）
  */
 @Configuration
+@org.springframework.context.annotation.ComponentScan(basePackageClasses = SecurityAutoConfiguration.class)
 public class SecurityAutoConfiguration {
 
     /** 自动注册 UserContextFilter，优先级最高 */

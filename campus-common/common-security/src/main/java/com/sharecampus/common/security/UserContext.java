@@ -1,50 +1,35 @@
 package com.sharecampus.common.security;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-/**
- * 当前登录用户上下文
- * <p>
- * 由 Gateway 解析 Token 后通过 Header 透传，下游服务通过拦截器解析到 ThreadLocal
- */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserContext {
 
-    /** 用户 ID */
     private Long userId;
-    /** 租户 ID */
     private Long tenantId;
-    /** 用户类型：STUDENT / WORKER / ADMIN */
     private String userType;
-    /** 角色列表 */
     private List<String> roles;
 
-    // ==================== ThreadLocal 持有 ====================
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getTenantId() { return tenantId; }
+    public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
+    public String getUserType() { return userType; }
+    public void setUserType(String userType) { this.userType = userType; }
+    public List<String> getRoles() { return roles; }
+    public void setRoles(List<String> roles) { this.roles = roles; }
 
+    // ==================== ThreadLocal ====================
     private static final ThreadLocal<UserContext> HOLDER = new ThreadLocal<>();
-
     public static void set(UserContext context) { HOLDER.set(context); }
-
     public static UserContext get() { return HOLDER.get(); }
-
     public static void clear() { HOLDER.remove(); }
 
-    // ==================== 快捷方法 ====================
-
-    public static Long getUserId() {
+    // ==================== 快捷静态方法 ====================
+    public static Long currentUserId() {
         UserContext ctx = get();
         return ctx != null ? ctx.getUserId() : null;
     }
-
-    public static Long getTenantId() {
+    public static Long currentTenantId() {
         UserContext ctx = get();
         return ctx != null ? ctx.getTenantId() : null;
     }

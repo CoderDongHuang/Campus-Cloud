@@ -28,13 +28,12 @@ public class UserContextFilter implements Filter {
 
         try {
             String userId = httpRequest.getHeader(HEADER_USER_ID);
-            if (userId != null) {
-                UserContext context = UserContext.builder()
-                        .userId(Long.valueOf(userId))
-                        .tenantId(parseLong(httpRequest.getHeader(HEADER_TENANT_ID)))
-                        .userType(httpRequest.getHeader(HEADER_USER_TYPE))
-                        .roles(parseList(httpRequest.getHeader(HEADER_ROLES)))
-                        .build();
+            if (userId != null && !"null".equals(userId) && !userId.isEmpty()) {
+                UserContext context = new UserContext();
+                context.setUserId(Long.valueOf(userId));
+                context.setTenantId(parseLong(httpRequest.getHeader(HEADER_TENANT_ID)));
+                context.setUserType(httpRequest.getHeader(HEADER_USER_TYPE));
+                context.setRoles(parseList(httpRequest.getHeader(HEADER_ROLES)));
                 UserContext.set(context);
             }
             chain.doFilter(request, response);
