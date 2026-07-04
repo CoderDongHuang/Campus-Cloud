@@ -24,8 +24,8 @@ public class ProductController {
     }
 
     @GetMapping("/spu/list")
-    public Result<List<ProductSpu>> spuList(@RequestParam(required = false) Long categoryId,
-                                            @RequestParam(required = false) String keyword) {
+    public Result<List<ProductSpu>> spuList(@RequestParam(name = "categoryId", required = false) Long categoryId,
+                                            @RequestParam(name = "keyword", required = false) String keyword) {
         return Result.success(productService.spuList(categoryId, keyword));
     }
 
