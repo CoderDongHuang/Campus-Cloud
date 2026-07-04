@@ -29,57 +29,57 @@ spring:
             - Path=/api/v1/product/**
         # ===== 订单服务 =====
         - id: campus-order
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/order/**
         # ===== 支付服务 =====
         - id: campus-payment
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/payment/**
         # ===== 优惠券服务 =====
         - id: campus-coupon
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/coupon/**
         # ===== 结算服务 =====
         - id: campus-settlement
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/settlement/**
         # ===== 搜索服务 =====
         - id: campus-search
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/search/**
         # ===== IM 服务 =====
         - id: campus-im
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/im/**
         # ===== 通知服务 =====
         - id: campus-notify
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/notify/**
         # ===== 评价服务 =====
         - id: campus-review
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/review/**
         # ===== 文件服务 =====
         - id: campus-file
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/file/**
         # ===== 数据服务 =====
         - id: campus-data
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/data/**
         # ===== 租户服务 =====
         - id: campus-tenant
-          uri: http://localhost:8080
+          uri: http://localhost:8084
           predicates:
             - Path=/api/v1/tenant/**
       # CORS 全局配置
