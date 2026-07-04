@@ -37,9 +37,9 @@ public class OrderService {
 
     /** 创建订单 */
     @Transactional
-    public Order createOrder(Order order) {
-        Long userId = UserContext.currentUserId();
-        Long tenantId = UserContext.currentTenantId();
+    public Order createOrder(Order order, Long userId, Long tenantId) {
+        // userId passed as parameter
+        // tenantId passed as parameter
         long orderId = idGenerator.nextId();
         String orderNo = idGenerator.nextOrderNo();
 
@@ -70,7 +70,7 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.pay();
         order.setUpdateTime(java.time.LocalDateTime.now());
-        orderMapper.updateById(order);
+        updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
         mqSender.send(MqConstants.ORDER_EXCHANGE, MqConstants.ORDER_CREATE_KEY,
                 MqMessage.of("order.create", orderNo));
@@ -82,7 +82,7 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.accept(workerId);
         order.setUpdateTime(java.time.LocalDateTime.now());
-        orderMapper.updateById(order);
+        updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -92,7 +92,7 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.complete();
         order.setUpdateTime(java.time.LocalDateTime.now());
-        orderMapper.updateById(order);
+        updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -102,7 +102,7 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.cancel(reason);
         order.setUpdateTime(java.time.LocalDateTime.now());
-        orderMapper.updateById(order);
+        updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -112,8 +112,18 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.applyRefund();
         order.setUpdateTime(java.time.LocalDateTime.now());
-        orderMapper.updateById(order);
+        updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
+    }
+
+    /** 精准更新状态（避开分片键，避免 ShardingSphere 拒绝） */
+    private void updateStatus(String orderNo, Order order) {
+        com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Order> uw =
+            new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<>();
+        uw.eq(Order::getOrderNo, orderNo)
+          .set(Order::getStatus, order.getStatus())
+          .set(Order::getUpdateTime, order.getUpdateTime());
+        orderMapper.update(null, uw);
     }
 
     /** 订单详情（缓存优先） */
@@ -133,9 +143,9 @@ public class OrderService {
     }
 
     /** 我的订单列表 */
-    public List<Order> myOrders(String status, int page, int size) {
+    public List<Order> myOrders(String status, int page, int size, Long userId) {
         LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<Order>()
-                .eq(Order::getUserId, UserContext.currentUserId())
+                .eq(Order::getUserId, userId)
                 .eq(status != null && !status.isEmpty(), Order::getStatus, status)
                 .orderByDesc(Order::getCreateTime);
         Page<Order> p = new Page<>(page, size);
