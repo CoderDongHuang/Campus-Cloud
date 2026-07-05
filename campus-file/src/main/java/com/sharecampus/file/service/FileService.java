@@ -20,10 +20,12 @@ public class FileService {
     @Value("${minio.bucket}") private String bucket;
 
     @PostConstruct
-    public void init() throws Exception {
-        if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-        }
+    public void init() {
+        try {
+            if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+            }
+        } catch (Exception e) { log.warn("MinIO未连接，文件服务降级: {}", e.getMessage()); }
     }
 
     public String upload(MultipartFile file) throws Exception {
