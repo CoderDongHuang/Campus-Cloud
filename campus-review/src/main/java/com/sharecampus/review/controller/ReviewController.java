@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController @RequestMapping("/api/v1/review") @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
-    @PostMapping("/reviews") public Result<Void> submit(@RequestBody OrderReview review) { review.setUserId(UserContext.currentUserId()); reviewService.submit(review); return Result.success(); }
+    @PostMapping("/reviews") public Result<Void> submit(@RequestBody OrderReview review, @RequestHeader("X-User-Id") Long userId) { review.setUserId(userId); reviewService.submit(review); return Result.success(); }
     @GetMapping("/reviews/{orderId}") public Result<OrderReview> getByOrder(@PathVariable Long orderId) { return Result.success(reviewService.getByOrderId(orderId)); }
     @GetMapping("/worker/{workerId}/reviews") public Result<java.util.List<OrderReview>> listByWorker(@PathVariable Long workerId) { return Result.success(reviewService.listByWorker(workerId)); }
 }
