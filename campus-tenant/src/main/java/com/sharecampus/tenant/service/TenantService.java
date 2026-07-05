@@ -29,8 +29,7 @@ public class TenantService {
     }
 
     /** 获取当前租户信息 */
-    public Tenant current() {
-        Long tenantId = UserContext.currentTenantId();
+    public Tenant current(Long tenantId) {
         Tenant tenant = tenantMapper.selectById(tenantId);
         if (tenant == null) throw new BizException(ErrorCode.TENANT_NOT_FOUND);
         return tenant;
