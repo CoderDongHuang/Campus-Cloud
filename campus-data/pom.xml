@@ -47,11 +47,14 @@
             <artifactId>common-security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Data服务用Feign，不需要MyBatis -->
+        <!--
         <dependency>
             <groupId>com.sharecampus</groupId>
             <artifactId>common-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
