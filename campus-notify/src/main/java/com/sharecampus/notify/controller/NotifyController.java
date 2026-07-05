@@ -17,7 +17,7 @@ public class NotifyController {
     private final NotifyService notifyService;
 
     @GetMapping("/messages")
-    public Result<List<MessageRecord>> myMessages() {
-        return Result.success(notifyService.myMessages(UserContext.currentUserId()));
+    public Result<List<MessageRecord>> myMessages(@RequestHeader("X-User-Id") Long userId) {
+        return Result.success(notifyService.myMessages(userId));
     }
 }
