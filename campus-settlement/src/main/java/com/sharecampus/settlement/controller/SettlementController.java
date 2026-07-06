@@ -21,18 +21,18 @@ public class SettlementController {
     private final SettlementService settlementService;
 
     @GetMapping("/wallet")
-    public Result<WorkerWallet> myWallet() {
-        return Result.success(settlementService.myWallet());
+    public Result<WorkerWallet> myWallet(@RequestHeader("X-User-Id") Long userId) {
+        return Result.success(settlementService.myWallet(userId));
     }
 
     @GetMapping("/orders")
-    public Result<List<SettlementOrder>> incomeList() {
-        return Result.success(settlementService.incomeList());
+    public Result<List<SettlementOrder>> incomeList(@RequestHeader("X-User-Id") Long userId) {
+        return Result.success(settlementService.incomeList(userId));
     }
 
     @PostMapping("/withdraw")
-    public Result<WithdrawApply> withdraw(@RequestBody Map<String, Object> body) {
+    public Result<WithdrawApply> withdraw(@RequestBody Map<String, Object> body, @RequestHeader("X-User-Id") Long userId) {
         BigDecimal amount = new BigDecimal(body.get("amount").toString());
-        return Result.success(settlementService.applyWithdraw(UserContext.currentUserId(), amount));
+        return Result.success(settlementService.applyWithdraw(userId, amount));
     }
 }
