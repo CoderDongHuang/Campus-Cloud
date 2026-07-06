@@ -8,12 +8,12 @@ import com.sharecampus.coupon.mapper.UserCouponMapper;
 import com.sharecampus.common.mq.MqMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +28,7 @@ public class CouponService {
 
     private final CouponTemplateMapper templateMapper;
     private final UserCouponMapper userCouponMapper;
-    private final RedissonClient redissonClient;
+    private final StringRedisTemplate redisTemplate;
 
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
             10, 20, 60, TimeUnit.SECONDS,
@@ -95,24 +95,23 @@ public class CouponService {
     }
 
     private void sendOne(Long templateId, Long userId) {
-        RLock lock = redissonClient.getLock("coupon:send:" + templateId + ":" + userId);
-        try {
-            if (lock.tryLock(3, 10, TimeUnit.SECONDS)) {
-                Long count = userCouponMapper.selectCount(new LambdaQueryWrapper<UserCoupon>()
-                        .eq(UserCoupon::getTemplateId, templateId)
-                        .eq(UserCoupon::getUserId, userId));
-                if (count > 0) return;
+        String lockKey = "coupon:send:" + templateId + ":" + userId;
+        Boolean locked = redisTemplate.opsForValue()
+                .setIfAbsent(lockKey, "1", Duration.ofSeconds(10));
+        if (Boolean.FALSE.equals(locked)) return;
 
-                UserCoupon coupon = new UserCoupon();
-                coupon.setTemplateId(templateId);
-                coupon.setUserId(userId);
-                coupon.setStatus("UNUSED");
-                userCouponMapper.insert(coupon);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        try {
+            Long count = userCouponMapper.selectCount(new LambdaQueryWrapper<UserCoupon>()
+                    .eq(UserCoupon::getTemplateId, templateId)
+                    .eq(UserCoupon::getUserId, userId));
+            if (count > 0) return;
+            UserCoupon coupon = new UserCoupon();
+            coupon.setTemplateId(templateId);
+            coupon.setUserId(userId);
+            coupon.setStatus("UNUSED");
+            userCouponMapper.insert(coupon);
         } finally {
-            if (lock.isHeldByCurrentThread()) lock.unlock();
+            redisTemplate.delete(lockKey);
         }
     }
 
