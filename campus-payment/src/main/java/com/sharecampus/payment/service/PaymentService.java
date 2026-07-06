@@ -14,15 +14,14 @@ import com.sharecampus.payment.entity.PayRefund;
 import com.sharecampus.payment.mapper.PayOrderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -32,17 +31,17 @@ public class PaymentService {
     private final PayOrderMapper payOrderMapper;
     private final PaymentChannel paymentChannel;
     private final MqSender mqSender;
-    private final RedissonClient redissonClient;
+    private final StringRedisTemplate redisTemplate;
 
     /** 发起支付 */
     @Transactional
-    public PayOrder pay(Long orderId, String orderNo, BigDecimal amount) {
+    public PayOrder pay(Long orderId, String orderNo, BigDecimal amount, Long userId) {
         String payOrderNo = "PAY" + IdUtil.getSnowflake().nextIdStr();
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderNo(payOrderNo);
         payOrder.setOrderId(orderId);
         payOrder.setOrderNo(orderNo);
-        payOrder.setUserId(UserContext.currentUserId());
+        payOrder.setUserId(userId);
         payOrder.setAmount(amount);
         payOrder.setChannel(paymentChannel.channelName());
         payOrder.setStatus("WAIT_PAY");
@@ -60,29 +59,26 @@ public class PaymentService {
     /** 支付回调（幂等） */
     @Transactional
     public void handleCallback(String channelTradeNo, Map<String, String> params) {
-        RLock lock = redissonClient.getLock("pay:callback:" + channelTradeNo);
+        String lockKey = "pay:callback:" + channelTradeNo;
+        Boolean locked = redisTemplate.opsForValue()
+                .setIfAbsent(lockKey, "1", Duration.ofSeconds(10));
+        if (Boolean.FALSE.equals(locked)) return;
+
         try {
-            if (!lock.tryLock(10, TimeUnit.SECONDS)) return;
-            // 幂等检查
             PayOrder existing = payOrderMapper.selectOne(
                     new LambdaQueryWrapper<PayOrder>().eq(PayOrder::getChannelTradeNo, channelTradeNo));
             if (existing != null && "PAY_SUCCESS".equals(existing.getStatus())) return;
-            // 验签
             if (!paymentChannel.verifyCallback(params)) {
                 throw new BizException(ErrorCode.PAY_CALLBACK_ERROR);
             }
-            // 更新支付单
             existing.setStatus("PAY_SUCCESS");
             existing.setPayTime(LocalDateTime.now());
             existing.setCallbackData(params.toString());
             payOrderMapper.updateById(existing);
-            // 通知订单服务
             mqSender.send(MqConstants.PAYMENT_EXCHANGE, "payment.callback.success",
                     MqMessage.of("pay.success", existing.getOrderNo()));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } finally {
-            if (lock.isHeldByCurrentThread()) lock.unlock();
+            redisTemplate.delete(lockKey);
         }
     }
 
