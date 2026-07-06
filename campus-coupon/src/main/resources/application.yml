@@ -2,6 +2,9 @@ server:
   port: 8086
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfigurationV2
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/campus_coupon?useSSL=false&serverTimezone=Asia/Shanghai
