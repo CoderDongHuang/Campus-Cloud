@@ -22,7 +22,8 @@ public class PaymentController {
         Long orderId = Long.valueOf(body.get("orderId").toString());
         String orderNo = (String) body.get("orderNo");
         BigDecimal amount = new BigDecimal(body.get("amount").toString());
-        return Result.success(paymentService.pay(orderId, orderNo, amount));
+        Long userId = Long.valueOf(body.getOrDefault("userId", "1").toString());
+        return Result.success(paymentService.pay(orderId, orderNo, amount, userId));
     }
 
     @PostMapping("/callback/{channel}")
