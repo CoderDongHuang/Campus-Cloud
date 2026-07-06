@@ -2,6 +2,9 @@ server:
   port: 8085
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfigurationV2
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/campus_payment?useSSL=false&serverTimezone=Asia/Shanghai
@@ -18,7 +21,6 @@ spring:
     username: guest
     password: guest
 
-# Mock 支付模式（开发环境）
 campus:
   payment:
     mock: true
