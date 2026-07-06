@@ -103,15 +103,15 @@ public class SettlementService {
     }
 
     /** 我的钱包 */
-    public WorkerWallet myWallet() {
-        return getOrCreateWallet(UserContext.currentUserId());
+    public WorkerWallet myWallet(Long userId) {
+        return getOrCreateWallet(userId);
     }
 
     /** 收入明细 */
-    public List<SettlementOrder> incomeList() {
+    public List<SettlementOrder> incomeList(Long userId) {
         return settlementOrderMapper.selectList(
                 new LambdaQueryWrapper<SettlementOrder>()
-                        .eq(SettlementOrder::getUserId, UserContext.currentUserId())
+                        .eq(SettlementOrder::getUserId, userId)
                         .orderByDesc(SettlementOrder::getCreateTime));
     }
 
