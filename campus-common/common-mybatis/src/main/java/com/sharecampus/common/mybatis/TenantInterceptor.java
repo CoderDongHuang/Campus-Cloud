@@ -15,9 +15,11 @@ import java.util.Set;
  */
 public class TenantInterceptor implements TenantLineHandler {
 
-    /** 不需要租户隔离的表（全局配置表、跨租户表） */
+    /** 不需要租户隔离的表（全局配置表、跨租户表、尚未迁移的表） */
     private static final Set<String> IGNORE_TABLES = Set.of(
-            "sys_config", "sys_dict", "tenant", "tenant_package"
+            "sys_config", "sys_dict", "tenant", "tenant_package",
+            "worker_wallet",            // 待迁移：无 tenant_id 列
+            "t_order_snapshot"          // 待迁移：无 tenant_id 列
     );
 
     @Override
