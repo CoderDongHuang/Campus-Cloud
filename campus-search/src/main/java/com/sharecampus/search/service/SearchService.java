@@ -27,8 +27,7 @@ public class SearchService {
     private final StringRedisTemplate redisTemplate;
 
     /** 商品搜索 */
-    public List<ProductDoc> search(String keyword, int page, int size) throws Exception {
-        Long tenantId = UserContext.currentTenantId();
+    public List<ProductDoc> search(String keyword, int page, int size, Long tenantId) throws Exception {
         // 记录热词
         redisTemplate.opsForZSet().incrementScore("hot:search", keyword, 1);
 

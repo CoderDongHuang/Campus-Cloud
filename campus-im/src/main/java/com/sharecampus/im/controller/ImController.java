@@ -1,7 +1,6 @@
 package com.sharecampus.im.controller;
 
 import com.sharecampus.common.core.model.Result;
-import com.sharecampus.common.security.UserContext;
 import com.sharecampus.im.entity.ImMessage;
 import com.sharecampus.im.service.ImService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class ImController {
     }
 
     @GetMapping("/offline-messages")
-    public Result<List<String>> offline() {
-        return Result.success(imService.pullOffline(UserContext.currentUserId()));
+    public Result<List<String>> offline(@RequestHeader("X-User-Id") Long userId) {
+        return Result.success(imService.pullOffline(userId));
     }
 }

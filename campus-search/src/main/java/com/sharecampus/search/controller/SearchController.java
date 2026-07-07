@@ -16,9 +16,9 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/product")
-    public Result<List<ProductDoc>> search(@RequestParam String keyword,
+    public Result<List<ProductDoc>> search(@RequestParam String keyword, @RequestHeader(value = "X-Tenant-Id", defaultValue = "0") Long tenantId,
                                            @RequestParam(defaultValue = "1") int page,
                                            @RequestParam(defaultValue = "20") int size) throws Exception {
-        return Result.success(searchService.search(keyword, page, size));
+        return Result.success(searchService.search(keyword, page, size, tenantId));
     }
 }
