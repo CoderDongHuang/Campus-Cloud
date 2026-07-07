@@ -43,6 +43,7 @@ public enum ErrorCode {
     PAY_FAILED(4001, "支付失败"),
     REFUND_AMOUNT_EXCEED(4002, "退款金额超出原订单金额"),
     PAY_CALLBACK_ERROR(4003, "支付回调验签失败"),
+    PAY_ORDER_NOT_FOUND(4004, "支付单不存在，请稍后重试"),
 
     // ===== 结算模块 5000-5999 =====
     SETTLE_BALANCE_NOT_ENOUGH(5001, "可提现余额不足"),
