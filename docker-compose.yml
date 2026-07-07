@@ -131,22 +131,23 @@ services:
       interval: 15s
       retries: 10
 
-  # ==================== Canal Server（可选，阶段9才用） ====================
-  # canal-server:
-  #   image: canal/canal-server:v1.1.7
-  #   container_name: campus-canal
-  #   restart: unless-stopped
-  #   ports:
-  #     - "11111:11111"
-  #   environment:
-  #     CANAL_ADMIN_MANAGER: ""
-  #     CANAL_IP: canal-server
-  #     CANAL_PORT: 11111
-  #   depends_on:
-  #     - mysql
-  #     - rabbitmq
-  #   volumes:
-  #     - ./campus-scripts/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+  # ==================== Canal Server（MySQL binlog → MQ → ES） ====================
+  canal-server:
+    image: canal/canal-server:v1.1.7
+    container_name: campus-canal
+    restart: unless-stopped
+    ports:
+      - "11111:11111"
+    environment:
+      CANAL_ADMIN_MANAGER: ""
+    depends_on:
+      - mysql
+      - rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./campus-scripts/canal/canal.properties:/home/admin/canal-server/conf/canal.properties
+      - ./campus-scripts/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
 
 # ==================== 数据卷 ====================
 volumes:
