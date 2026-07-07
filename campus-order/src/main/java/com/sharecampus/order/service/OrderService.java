@@ -185,6 +185,29 @@ public class OrderService {
                 Duration.ofMinutes(30));
     }
 
+    // ===== 定时任务 =====
+
+    /** 每 5 分钟自动取消超时未支付订单 */
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 300000)
+    public void autoCancelTimeoutOrders() {
+        log.info("定时任务: 扫描超时订单...");
+        java.time.LocalDateTime deadline = java.time.LocalDateTime.now().minusMinutes(15);
+        java.util.List<Order> timeoutOrders = orderMapper.selectList(
+            new LambdaQueryWrapper<Order>()
+                .eq(Order::getStatus, "PENDING_PAY")
+                .lt(Order::getCreateTime, deadline)
+        );
+        for (Order order : timeoutOrders) {
+            try {
+                cancel(order.getOrderNo(), "超时未支付自动取消");
+                log.info("超时订单自动取消: orderNo={}", order.getOrderNo());
+            } catch (Exception e) {
+                log.error("自动取消失败: orderNo={}", order.getOrderNo(), e);
+            }
+        }
+        log.info("定时任务完成: 取消 {} 笔超时订单", timeoutOrders.size());
+    }
+
     // ===== 统计（给 data-service 调） =====
 
     public Map<String, Object> todayStats() {

@@ -115,6 +115,24 @@ public class CouponService {
         }
     }
 
+    // ===== 定时任务 =====
+
+    /** 每天凌晨 2 点清理过期优惠券 */
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * ?")
+    public void expireOverdueCoupons() {
+        log.info("定时任务: 清理过期优惠券...");
+        java.util.List<UserCoupon> expiredCoupons = userCouponMapper.selectList(
+            new LambdaQueryWrapper<UserCoupon>()
+                .eq(UserCoupon::getStatus, "UNUSED")
+                .lt(UserCoupon::getExpireTime, java.time.LocalDateTime.now())
+        );
+        for (UserCoupon coupon : expiredCoupons) {
+            coupon.setStatus("EXPIRED");
+            userCouponMapper.updateById(coupon);
+        }
+        log.info("定时任务完成: {} 张券已过期", expiredCoupons.size());
+    }
+
     // ===== 我的优惠券 =====
 
     public List<UserCoupon> myCoupons(String status) {
