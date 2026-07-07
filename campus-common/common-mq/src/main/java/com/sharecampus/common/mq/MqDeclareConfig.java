@@ -42,7 +42,25 @@ public class MqDeclareConfig {
     @Bean public Binding notifyPushBinding() { return BindingBuilder.bind(notifyPushQueue()).to(notifyExchange()); }
     @Bean public Binding notifyInboxBinding() { return BindingBuilder.bind(notifyInboxQueue()).to(notifyExchange()); }
 
-    // ===== 数据同步 =====
+    // ===== 结算 =====
+    @Bean public TopicExchange settlementExchange() { return new TopicExchange(MqConstants.SETTLEMENT_EXCHANGE); }
+    @Bean public Queue settlementSettleQueue() { return new Queue(MqConstants.SETTLEMENT_SETTLE_QUEUE, true); }
+    @Bean public Queue settlementWithdrawQueue() { return new Queue(MqConstants.SETTLEMENT_WITHDRAW_QUEUE, true); }
+    @Bean public Binding settlementSettleBinding() { return BindingBuilder.bind(settlementSettleQueue()).to(settlementExchange()).with(MqConstants.SETTLEMENT_SETTLE_KEY); }
+    @Bean public Binding settlementWithdrawBinding() { return BindingBuilder.bind(settlementWithdrawQueue()).to(settlementExchange()).with(MqConstants.SETTLEMENT_WITHDRAW_KEY); }
+
+    // ===== IM =====
+    @Bean public TopicExchange imExchange() { return new TopicExchange(MqConstants.IM_EXCHANGE); }
+    @Bean public Queue imMessageQueue() { return new Queue(MqConstants.IM_MESSAGE_QUEUE, true); }
+    @Bean public Queue imSystemQueue() { return new Queue(MqConstants.IM_SYSTEM_QUEUE, true); }
+    @Bean public Binding imMessageBinding() { return BindingBuilder.bind(imMessageQueue()).to(imExchange()).with(MqConstants.IM_MESSAGE_KEY); }
+    @Bean public Binding imSystemBinding() { return BindingBuilder.bind(imSystemQueue()).to(imExchange()).with(MqConstants.IM_SYSTEM_KEY); }
+
+    // ===== 数据同步(Canal) =====
+    @Bean public DirectExchange canalSyncExchange() { return new DirectExchange("canal.sync.exchange"); }
+    @Bean public Binding canalSyncBinding() { return BindingBuilder.bind(dbSyncProductQueue()).to(canalSyncExchange()).with("canal.sync.routing.key"); }
+
+    // ===== 数据同步(ProductService) =====
     @Bean public TopicExchange dbSyncExchange() { return new TopicExchange(MqConstants.DB_SYNC_EXCHANGE); }
     @Bean public Queue dbSyncProductQueue() { return new Queue(MqConstants.DB_SYNC_PRODUCT_QUEUE, true); }
     @Bean public Binding dbSyncProductBinding() { return BindingBuilder.bind(dbSyncProductQueue()).to(dbSyncExchange()).with(MqConstants.DB_SYNC_PRODUCT_KEY); }
