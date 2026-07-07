@@ -50,20 +50,56 @@ public class SearchService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /** Canal 数据同步消费者 — 收到消息后索引到 ES */
+    /** Canal binlog同步消费者 — 处理Canal原生flatMessage格式 */
+    @RabbitListener(queues = "canal.data.sync.queue")
+    @SuppressWarnings("unchecked")
+    public void handleCanalSync(org.springframework.amqp.core.Message message) {
+        try {
+            String rawJson = new String(message.getBody(), java.nio.charset.StandardCharsets.UTF_8);
+            Map<String, Object> canalMsg = objectMapper.readValue(rawJson, Map.class);
+            String type = (String) canalMsg.get("type");
+            List<Map<String, Object>> dataList = (List<Map<String, Object>>) canalMsg.get("data");
+            if (dataList == null || dataList.isEmpty()) return;
+
+            for (Map<String, Object> row : dataList) {
+                String spuId = String.valueOf(row.get("id"));
+                if ("DELETE".equals(type)) {
+                    esClient.delete(d -> d.index("campus_product_spu").id(spuId));
+                    log.info("Canal-ES删除: spuId={}", spuId);
+                } else {
+                    ProductDoc doc = new ProductDoc();
+                    doc.setSpuId(Long.valueOf(spuId));
+                    doc.setName((String) row.get("name"));
+                    doc.setDescription((String) row.get("description"));
+                    doc.setStatus(row.get("status") != null ? Integer.valueOf(row.get("status").toString()) : 1);
+                    doc.setSalesCount(row.get("sales_count") != null ? Integer.valueOf(row.get("sales_count").toString()) : 0);
+                    esClient.index(i -> i.index("campus_product_spu").id(spuId).document(doc));
+                    log.info("Canal-ES索引: spuId={}, name={}", spuId, doc.getName());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Canal同步失败", e);
+        }
+    }
+
+    /** ProductService MQ消费者 — 收到消息后索引到 ES */
     @RabbitListener(queues = MqConstants.DB_SYNC_PRODUCT_QUEUE)
     @SuppressWarnings("unchecked")
     public void handleProductSync(MqMessage msg) {
+        log.info("收到数据同步消息: type={}, msgId={}", msg.getType(), msg.getMessageId());
         try {
             Map<String, Object> data = objectMapper.readValue(msg.getData(), Map.class);
             String type = (String) data.getOrDefault("type", "INSERT");
             Map<String, Object> product = (Map<String, Object>) data.get("product");
-            if (product == null) return;
+            if (product == null) {
+                log.warn("product为null, 跳过: msgId={}", msg.getMessageId());
+                return;
+            }
 
             String spuId = String.valueOf(product.get("id"));
             if ("DELETE".equals(type)) {
                 esClient.delete(d -> d.index("campus_product_spu").id(spuId));
-                log.debug("ES删除商品: spuId={}", spuId);
+                log.info("ES删除商品: spuId={}", spuId);
             } else {
                 ProductDoc doc = new ProductDoc();
                 doc.setSpuId(Long.valueOf(spuId));
@@ -72,10 +108,10 @@ public class SearchService {
                 doc.setStatus(1);
                 doc.setSalesCount(product.get("salesCount") != null ? ((Number) product.get("salesCount")).intValue() : 0);
                 esClient.index(i -> i.index("campus_product_spu").id(spuId).document(doc));
-                log.debug("ES索引商品: spuId={}, name={}", spuId, doc.getName());
+                log.info("ES索引商品: spuId={}, name={}", spuId, doc.getName());
             }
         } catch (Exception e) {
-            log.error("Canal同步失败: msgId={}", msg.getMessageId(), e);
+            log.error("数据同步失败: msgId={}", msg.getMessageId(), e);
         }
     }
 }

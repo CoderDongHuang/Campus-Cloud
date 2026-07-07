@@ -1,6 +1,10 @@
 package com.sharecampus.product.service;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sharecampus.common.mq.MqConstants;
+import com.sharecampus.common.mq.MqMessage;
+import com.sharecampus.common.mq.MqSender;
 import com.sharecampus.product.entity.ProductCategory;
 import com.sharecampus.product.entity.ProductSku;
 import com.sharecampus.product.entity.ProductSpu;
@@ -25,6 +29,7 @@ public class ProductService {
     private final ProductSpuMapper spuMapper;
     private final ProductSkuMapper skuMapper;
     private final StringRedisTemplate redisTemplate;
+    private final MqSender mqSender;
 
     // ==================== 类目 ====================
 
@@ -89,11 +94,13 @@ public class ProductService {
     public void saveSpu(ProductSpu spu) {
         spuMapper.insert(spu);
         redisTemplate.delete("product:detail:" + spu.getId());
+        syncToEs(spu, "INSERT");
     }
 
     public void updateSpu(ProductSpu spu) {
         spuMapper.updateById(spu);
         redisTemplate.delete("product:detail:" + spu.getId());
+        syncToEs(spu, "UPDATE");
     }
 
     public void updateSpuStatus(Long id, Integer status) {
@@ -101,6 +108,8 @@ public class ProductService {
         spu.setId(id);
         spu.setStatus(status);
         spuMapper.updateById(spu);
+        ProductSpu full = spuMapper.selectById(id);
+        if (full != null) syncToEs(full, status == 1 ? "INSERT" : "DELETE");
     }
 
     public void saveSku(ProductSku sku) {
@@ -109,5 +118,25 @@ public class ProductService {
 
     public void updateSku(ProductSku sku) {
         skuMapper.updateById(sku);
+    }
+
+    /** 商品变更同步到ES（替代Canal） */
+    private void syncToEs(ProductSpu spu, String type) {
+        try {
+            Map<String, Object> product = new HashMap<>();
+            product.put("id", spu.getId());
+            product.put("name", spu.getName());
+            product.put("description", spu.getDescription());
+            product.put("status", spu.getStatus());
+            product.put("salesCount", spu.getSalesCount() != null ? spu.getSalesCount() : 0);
+            Map<String, Object> data = new HashMap<>();
+            data.put("type", type);
+            data.put("product", product);
+            mqSender.send(MqConstants.DB_SYNC_EXCHANGE, "db.sync.product.insert",
+                    MqMessage.of("product.sync", JSONUtil.toJsonStr(data)));
+            log.info("商品同步MQ: type={}, spuId={}", type, spu.getId());
+        } catch (Exception e) {
+            log.error("商品同步MQ失败: spuId={}", spu.getId(), e);
+        }
     }
 }
