@@ -67,7 +67,13 @@ public class PaymentService {
         try {
             PayOrder existing = payOrderMapper.selectOne(
                     new LambdaQueryWrapper<PayOrder>().eq(PayOrder::getChannelTradeNo, channelTradeNo));
+            // 幂等：已支付直接返回
             if (existing != null && "PAY_SUCCESS".equals(existing.getStatus())) return;
+            // 支付单不存在（事务未提交或回调过早），抛异常等MQ重试
+            if (existing == null) {
+                log.warn("支付单不存在，等待重试: channelTradeNo={}", channelTradeNo);
+                throw new BizException(ErrorCode.PAY_ORDER_NOT_FOUND);
+            }
             if (!paymentChannel.verifyCallback(params)) {
                 throw new BizException(ErrorCode.PAY_CALLBACK_ERROR);
             }
