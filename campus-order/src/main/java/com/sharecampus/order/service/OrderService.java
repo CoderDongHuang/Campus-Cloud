@@ -72,8 +72,12 @@ public class OrderService {
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
+        // 通知下游：订单创建/支付完成
         mqSender.send(MqConstants.ORDER_EXCHANGE, MqConstants.ORDER_CREATE_KEY,
                 MqMessage.of("order.create", orderNo));
+        // 发通知："您的订单已支付成功"
+        mqSender.send(MqConstants.NOTIFY_EXCHANGE, "notify.inbox",
+                MqMessage.of("order.paid", orderNo + ":" + order.getUserId()));
     }
 
     /** 师傅接单 */
@@ -82,7 +86,14 @@ public class OrderService {
         Order order = getByOrderNo(orderNo);
         order.accept(workerId);
         order.setUpdateTime(java.time.LocalDateTime.now());
-        updateStatus(orderNo, order);
+        // 精准更新：状态 + worker_id + update_time
+        com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Order> uw =
+            new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<>();
+        uw.eq(Order::getOrderNo, orderNo)
+          .set(Order::getStatus, order.getStatus())
+          .set(Order::getWorkerId, workerId)
+          .set(Order::getUpdateTime, order.getUpdateTime());
+        orderMapper.update(null, uw);
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -94,6 +105,15 @@ public class OrderService {
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
         redisTemplate.delete("order:detail:" + orderNo);
+        // 触发结算
+        String settleData = order.getOrderId() + ":" + orderNo + ":" +
+                (order.getWorkerId() != null ? order.getWorkerId() : "0") + ":" +
+                order.getActualAmount() + ":" + (order.getSpuId() != null ? order.getSpuId() : "1");
+        mqSender.send(MqConstants.SETTLEMENT_EXCHANGE, MqConstants.SETTLEMENT_SETTLE_KEY,
+                MqMessage.of("order.completed", settleData));
+        // 发通知
+        mqSender.send(MqConstants.NOTIFY_EXCHANGE, "notify.inbox",
+                MqMessage.of("order.completed", orderNo + ":" + order.getUserId()));
     }
 
     /** 取消订单 */
