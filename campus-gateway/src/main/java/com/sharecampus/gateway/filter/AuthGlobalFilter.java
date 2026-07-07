@@ -32,7 +32,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> whiteUrls = java.util.List.of(
         "/api/v1/auth/login", "/api/v1/auth/login/sms", "/api/v1/auth/register",
-        "/api/v1/auth/sms/send", "/api/v1/product/**", "/doc.html", "/v3/api-docs/**"
+        "/api/v1/auth/sms/send", "/api/v1/product/**", "/doc.html", "/v3/api-docs/**",
+        "/ws/**", "/actuator/health"
     );
 
     public AuthGlobalFilter() {
@@ -66,6 +67,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             log.info("JWT解析成功: userId={}, tenantId={}", context.getUserId(), context.getTenantId());
             exchange = exchange.mutate()
                     .request(r -> r
+                            .header("X-Gateway-Key", "campus-cloud-gateway-2026")
                             .header("X-User-Id", String.valueOf(context.getUserId()))
                             .header("X-Tenant-Id", String.valueOf(context.getTenantId()))
                             .header("X-User-Type", context.getUserType() != null ? context.getUserType() : "")

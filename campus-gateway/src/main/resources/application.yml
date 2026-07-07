@@ -57,6 +57,11 @@ spring:
           uri: http://localhost:8090
           predicates:
             - Path=/api/v1/im/**
+        # IM WebSocket（需要协议升级）
+        - id: campus-im-ws
+          uri: http://localhost:8090
+          predicates:
+            - Path=/ws/**
         # ===== 通知服务 =====
         - id: campus-notify
           uri: http://localhost:8091
@@ -82,12 +87,12 @@ spring:
           uri: http://localhost:8088
           predicates:
             - Path=/api/v1/tenant/**
-      # CORS 全局配置
+      # CORS 全局配置（生产环境需改为具体前端域名）
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods: "*"
+            allowedOriginPatterns: "http://localhost:3000,http://localhost:5173"
+            allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
             allowedHeaders: "*"
             allowCredentials: true
 

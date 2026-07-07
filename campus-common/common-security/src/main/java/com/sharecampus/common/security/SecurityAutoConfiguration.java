@@ -22,4 +22,14 @@ public class SecurityAutoConfiguration {
         registration.setOrder(Integer.MIN_VALUE); // 最早执行
         return registration;
     }
+
+    /** 自动注册 GatewayAuthFilter，确保请求来自 Gateway */
+    @Bean
+    public FilterRegistrationBean<GatewayAuthFilter> gatewayAuthFilterRegistration() {
+        FilterRegistrationBean<GatewayAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new GatewayAuthFilter());
+        registration.addUrlPatterns("/*");
+        registration.setOrder(Integer.MIN_VALUE + 1); // 仅次于 UserContextFilter
+        return registration;
+    }
 }
