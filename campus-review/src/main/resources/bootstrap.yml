@@ -14,3 +14,7 @@ spring:
           - data-id: campus-common.yaml
             group: DEFAULT_GROUP
             refresh: true
+
+jasypt:
+  encryptor:
+    password: ***REMOVED***

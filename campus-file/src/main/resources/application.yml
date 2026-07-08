@@ -14,3 +14,9 @@ minio:
   accessKey: minioadmin
   secretKey: minioadmin
   bucket: campus-file
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

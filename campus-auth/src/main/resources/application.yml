@@ -27,3 +27,9 @@ campus:
   sms:
     code-expire: 300          # 验证码 5 分钟过期
     resend-interval: 60       # 重发间隔 60 秒
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -107,3 +107,27 @@ campus:
       - /api/v1/product/**
       - /doc.html
       - /v3/api-docs/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# ==================== Knife4j 聚合文档 ====================
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    discover:
+      enabled: true
+      version: openapi3
+
+# Knife4j 聚合文档
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    discover:
+      enabled: true
+      version: openapi3

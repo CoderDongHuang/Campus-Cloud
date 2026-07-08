@@ -25,3 +25,9 @@ spring:
 campus:
   payment:
     mock: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
