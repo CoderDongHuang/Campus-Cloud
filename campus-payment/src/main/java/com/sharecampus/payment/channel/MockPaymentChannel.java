@@ -2,14 +2,16 @@ package com.sharecampus.payment.channel;
 
 import cn.hutool.core.util.IdUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
-/** Mock 支付渠道 — 开发环境用，生产替换为微信/支付宝 */
+/** Mock 支付渠道 — 开发环境用 (@Profile("dev"))，生产替换为微信/支付宝 */
 @Slf4j
 @Component
+@Profile("dev")
 public class MockPaymentChannel implements PaymentChannel {
 
     @Override public String channelName() { return "mock"; }
