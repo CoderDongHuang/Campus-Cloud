@@ -42,4 +42,15 @@ public class FileService {
     public InputStream download(String objectName) throws Exception {
         return minioClient.getObject(GetObjectArgs.builder().bucket(bucket).object(objectName).build());
     }
+
+    /** 生成前端直传预签名URL（有效期10分钟） */
+    public String presignedUploadUrl(String objectName) throws Exception {
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(io.minio.http.Method.PUT)
+                        .bucket(bucket)
+                        .object(objectName)
+                        .expiry(10 * 60) // 10分钟
+                        .build());
+    }
 }

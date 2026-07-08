@@ -13,6 +13,7 @@ import com.sharecampus.order.OrderIdGenerator;
 import com.sharecampus.order.entity.Order;
 import com.sharecampus.order.entity.OrderSnapshot;
 import com.sharecampus.order.mapper.OrderMapper;
+import com.sharecampus.order.mapper.OrderSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import java.util.Map;
 public class OrderService {
 
     private final OrderMapper orderMapper;
+    private final OrderSnapshotMapper snapshotMapper;
     private final OrderIdGenerator idGenerator;
     private final StringRedisTemplate redisTemplate;
     private final MqSender mqSender;
@@ -185,18 +188,21 @@ public class OrderService {
         OrderSnapshot snapshot = new OrderSnapshot();
         snapshot.setSnapshotId(idGenerator.nextId());
         snapshot.setOrderId(order.getOrderId());
+        snapshot.setTenantId(order.getTenantId());
         snapshot.setOrderNo(order.getOrderNo());
-        Map<String, Object> data = Map.of(
-                "actualAmount", order.getActualAmount(),
-                "createTime", order.getCreateTime().toString()
-        );
+        snapshot.setCreateTime(java.time.LocalDateTime.now());
+        Map<String, Object> data = new HashMap<>();
+        data.put("actualAmount", order.getActualAmount());
+        data.put("createTime", order.getCreateTime().toString());
+        data.put("skuId", order.getSkuId());
+        data.put("spuId", order.getSpuId());
         snapshot.setSnapshotData(JSONUtil.toJsonStr(data));
-        // 用 JDBC 插入快照（简单方式）
-        // snapshotMapper.insert(snapshot);
+        snapshotMapper.insert(snapshot);
     }
 
     private OrderSnapshot getSnapshot(String orderNo) {
-        return null; // TODO: 从 t_order_snapshot 查询
+        return snapshotMapper.selectOne(
+                new LambdaQueryWrapper<OrderSnapshot>().eq(OrderSnapshot::getOrderNo, orderNo));
     }
 
     private void cacheOrderDetail(Order order) {

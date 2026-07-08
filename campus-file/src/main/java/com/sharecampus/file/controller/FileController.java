@@ -26,4 +26,10 @@ public class FileController {
             is.transferTo(os);
         }
     }
+
+    /** 获取前端直传预签名URL */
+    @PostMapping("/sts-token")
+    public Result<String> stsToken(@RequestParam String objectName) throws Exception {
+        return Result.success(fileService.presignedUploadUrl(objectName));
+    }
 }

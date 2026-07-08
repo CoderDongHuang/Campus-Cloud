@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class OrderSnapshot {
     private Long snapshotId;
     private Long orderId;
+    private Long tenantId;
     private String orderNo;
     private String snapshotData; // JSON
     private LocalDateTime createTime;
