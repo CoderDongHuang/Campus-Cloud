@@ -36,8 +36,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         "/ws/**", "/actuator/health"
     );
 
-    public AuthGlobalFilter() {
-        this.jwtTokenProvider = new JwtTokenProvider();
+    public AuthGlobalFilter(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override

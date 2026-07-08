@@ -19,20 +19,29 @@ import java.util.*;
 @org.springframework.stereotype.Component
 public class JwtTokenProvider {
 
-    /** 默认密钥（生产环境应从 Nacos 配置读取） */
     private static final String DEFAULT_SECRET = "ShareCampusCloud2025SecretKeyForJWT!!!!";
-    /** AccessToken 有效期：2 小时 */
     public static final long ACCESS_TOKEN_EXPIRE_MS = 2 * 60 * 60 * 1000L;
-    /** RefreshToken 有效期：7 天 */
     public static final long REFRESH_TOKEN_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000L;
 
-    private final SecretKey secretKey;
+    @org.springframework.beans.factory.annotation.Value("${campus.jwt.secret:" + DEFAULT_SECRET + "}")
+    private String secret;
 
+    private SecretKey secretKey;
+
+    /** 无参构造器（用于单元测试或非Spring环境） */
     public JwtTokenProvider() {
-        this(DEFAULT_SECRET);
+        this.secret = DEFAULT_SECRET;
+        initSecretKey();
     }
 
-    public JwtTokenProvider(String secret) {
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        if (secret == null) secret = DEFAULT_SECRET;
+        initSecretKey();
+        log.info("JWT密钥已加载(来源: {})", secret.equals(DEFAULT_SECRET) ? "默认值" : "Nacos配置");
+    }
+
+    private void initSecretKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         this.secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
     }
