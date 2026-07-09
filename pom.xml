@@ -51,7 +51,7 @@
         <mysql-connector.version>8.2.0</mysql-connector.version>
 
         <!-- 缓存 & 锁 -->
-        <redisson.version>3.27.2</redisson.version>
+        <redisson.version>3.30.0</redisson.version>
 
         <!-- 搜索 & 文档存储 -->
         <elasticsearch.version>8.11.0</elasticsearch.version>
@@ -178,6 +178,20 @@
                 <groupId>com.github.ulisesbocchio</groupId>
                 <artifactId>jasypt-spring-boot-starter</artifactId>
                 <version>3.0.5</version>
+            </dependency>
+
+            <!-- XXL-JOB 分布式定时任务 -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-job-core</artifactId>
+                <version>2.4.0</version>
+            </dependency>
+
+            <!-- Micrometer Prometheus 指标采集 -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>1.12.5</version>
             </dependency>
 
             <!-- Hutool 工具库 -->

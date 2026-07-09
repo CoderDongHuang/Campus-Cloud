@@ -23,4 +23,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
+
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:18080/xxl-job-admin
+    executor:
+      appname: campus-${spring.application.name}
+      port: 9999

@@ -112,7 +112,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
 
 # ==================== Knife4j 聚合文档 ====================
 knife4j:
