@@ -184,7 +184,7 @@ services:
     depends_on:
       - elasticsearch
 
-  # ==================== 数据卷 ====================
+# ==================== 数据卷 ====================
 volumes:
   mysql-data:
   redis-data:
