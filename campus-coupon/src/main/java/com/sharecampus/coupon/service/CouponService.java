@@ -118,7 +118,7 @@ public class CouponService {
     // ===== 定时任务 =====
 
     /** 每天凌晨 2 点清理过期优惠券 */
-    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * ?")
+    @com.xxl.job.core.handler.annotation.XxlJob("expireOverdueCoupons")
     public void expireOverdueCoupons() {
         log.info("定时任务: 清理过期优惠券...");
         java.util.List<UserCoupon> expiredCoupons = userCouponMapper.selectList(

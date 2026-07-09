@@ -56,7 +56,7 @@ public class SettlementService {
 
     /** T+1 定时结算 — 待结算 → 可提现 （每天凌晨 2 点执行） */
     @Transactional
-    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * ?")
+    @com.xxl.job.core.handler.annotation.XxlJob("dailySettlement")
     public void dailySettlement() {
         List<SettlementOrder> pendingList = settlementOrderMapper.selectList(
                 new LambdaQueryWrapper<SettlementOrder>()

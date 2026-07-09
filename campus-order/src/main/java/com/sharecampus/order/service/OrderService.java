@@ -214,7 +214,7 @@ public class OrderService {
     // ===== 定时任务 =====
 
     /** 每 5 分钟自动取消超时未支付订单 */
-    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 300000)
+    @com.xxl.job.core.handler.annotation.XxlJob("autoCancelTimeoutOrders")
     public void autoCancelTimeoutOrders() {
         log.info("定时任务: 扫描超时订单...");
         java.time.LocalDateTime deadline = java.time.LocalDateTime.now().minusMinutes(15);
