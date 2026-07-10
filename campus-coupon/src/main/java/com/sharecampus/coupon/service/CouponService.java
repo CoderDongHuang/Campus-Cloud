@@ -2,8 +2,10 @@ package com.sharecampus.coupon.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sharecampus.coupon.entity.CouponTemplate;
+import com.sharecampus.coupon.entity.CouponUseLog;
 import com.sharecampus.coupon.entity.UserCoupon;
 import com.sharecampus.coupon.mapper.CouponTemplateMapper;
+import com.sharecampus.coupon.mapper.CouponUseLogMapper;
 import com.sharecampus.coupon.mapper.UserCouponMapper;
 import com.sharecampus.common.mq.MqMessage;
 import lombok.RequiredArgsConstructor;
@@ -131,6 +133,62 @@ public class CouponService {
             userCouponMapper.updateById(coupon);
         }
         log.info("定时任务完成: {} 张券已过期", expiredCoupons.size());
+    }
+
+    // ===== 券核销 =====
+
+    private final CouponUseLogMapper useLogMapper;
+
+    /** 下单时锁定优惠券（状态 UNUSED → LOCKED） */
+    @Transactional
+    public boolean lockCoupon(Long couponId, String orderNo) {
+        UserCoupon coupon = userCouponMapper.selectById(couponId);
+        if (coupon == null || !"UNUSED".equals(coupon.getStatus())) return false;
+        coupon.setStatus("LOCKED");
+        coupon.setUsedOrderNo(orderNo);
+        userCouponMapper.updateById(coupon);
+        // 使用日志
+        CouponUseLog useLog = new CouponUseLog();
+        useLog.setCouponId(couponId);
+        useLog.setTemplateId(coupon.getTemplateId());
+        useLog.setUserId(coupon.getUserId());
+        useLog.setOrderNo(orderNo);
+        useLog.setAction("LOCK");
+        useLogMapper.insert(useLog);
+        return true;
+    }
+
+    /** 支付成功后核销优惠券（LOCKED → USED） */
+    @Transactional
+    public void useCoupon(Long couponId) {
+        UserCoupon coupon = userCouponMapper.selectById(couponId);
+        if (coupon == null || !"LOCKED".equals(coupon.getStatus())) return;
+        coupon.setStatus("USED");
+        coupon.setUsedTime(java.time.LocalDateTime.now());
+        userCouponMapper.updateById(coupon);
+        CouponUseLog useLog = new CouponUseLog();
+        useLog.setCouponId(couponId);
+        useLog.setTemplateId(coupon.getTemplateId());
+        useLog.setUserId(coupon.getUserId());
+        useLog.setOrderNo(coupon.getUsedOrderNo());
+        useLog.setAction("USE");
+        useLogMapper.insert(useLog);
+    }
+
+    /** 取消订单退回优惠券（LOCKED → UNUSED） */
+    @Transactional
+    public void returnCoupon(Long couponId) {
+        UserCoupon coupon = userCouponMapper.selectById(couponId);
+        if (coupon == null || !"LOCKED".equals(coupon.getStatus())) return;
+        coupon.setStatus("UNUSED");
+        coupon.setUsedOrderNo(null);
+        userCouponMapper.updateById(coupon);
+        CouponUseLog useLog = new CouponUseLog();
+        useLog.setCouponId(couponId);
+        useLog.setTemplateId(coupon.getTemplateId());
+        useLog.setUserId(coupon.getUserId());
+        useLog.setAction("RETURN");
+        useLogMapper.insert(useLog);
     }
 
     // ===== 我的优惠券 =====
