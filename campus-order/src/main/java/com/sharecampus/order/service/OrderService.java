@@ -12,7 +12,11 @@ import com.sharecampus.common.security.UserContext;
 import com.sharecampus.order.OrderIdGenerator;
 import com.sharecampus.order.entity.Order;
 import com.sharecampus.order.entity.OrderSnapshot;
+import com.sharecampus.order.entity.OrderLog;
+import com.sharecampus.order.entity.OrderRefund;
+import com.sharecampus.order.mapper.OrderLogMapper;
 import com.sharecampus.order.mapper.OrderMapper;
+import com.sharecampus.order.mapper.OrderRefundMapper;
 import com.sharecampus.order.mapper.OrderSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +38,8 @@ public class OrderService {
 
     private final OrderMapper orderMapper;
     private final OrderSnapshotMapper snapshotMapper;
+    private final OrderLogMapper logMapper;
+    private final OrderRefundMapper refundMapper;
     private final OrderIdGenerator idGenerator;
     private final StringRedisTemplate redisTemplate;
     private final MqSender mqSender;
@@ -63,6 +69,9 @@ public class OrderService {
         mqSender.sendDelay(MqConstants.ORDER_DELAY_EXCHANGE, "order.delay.close",
                 MqMessage.of("order.delay", orderNo), 900000);
 
+        // 通知IM：自动创建订单会话
+        mqSender.send(MqConstants.IM_EXCHANGE, MqConstants.IM_SYSTEM_KEY,
+                MqMessage.of("order.created", orderNo + ":" + userId + ":订单创建成功:您的订单已创建，等待师傅接单"));
         log.info("订单创建成功: orderNo={}, userId={}", orderNo, userId);
         return order;
     }
@@ -71,14 +80,15 @@ public class OrderService {
     @Transactional
     public void pay(String orderNo) {
         Order order = getByOrderNo(orderNo);
+        String from = order.getStatus();
         order.pay();
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
+        saveLog(order, from, "支付成功");
         redisTemplate.delete("order:detail:" + orderNo);
         // 通知下游：订单创建/支付完成
         mqSender.send(MqConstants.ORDER_EXCHANGE, MqConstants.ORDER_CREATE_KEY,
                 MqMessage.of("order.create", orderNo));
-        // 发通知："您的订单已支付成功"
         mqSender.send(MqConstants.NOTIFY_EXCHANGE, "notify.inbox",
                 MqMessage.of("order.paid", orderNo + ":" + order.getUserId()));
     }
@@ -87,9 +97,9 @@ public class OrderService {
     @Transactional
     public void accept(String orderNo, Long workerId) {
         Order order = getByOrderNo(orderNo);
+        String from = order.getStatus();
         order.accept(workerId);
         order.setUpdateTime(java.time.LocalDateTime.now());
-        // 精准更新：状态 + worker_id + update_time
         com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Order> uw =
             new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<>();
         uw.eq(Order::getOrderNo, orderNo)
@@ -97,6 +107,7 @@ public class OrderService {
           .set(Order::getWorkerId, workerId)
           .set(Order::getUpdateTime, order.getUpdateTime());
         orderMapper.update(null, uw);
+        saveLog(order, from, "师傅接单, workerId=" + workerId);
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -104,17 +115,17 @@ public class OrderService {
     @Transactional
     public void complete(String orderNo) {
         Order order = getByOrderNo(orderNo);
+        String from = order.getStatus();
         order.complete();
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
+        saveLog(order, from, "服务完成");
         redisTemplate.delete("order:detail:" + orderNo);
-        // 触发结算
         String settleData = order.getOrderId() + ":" + orderNo + ":" +
                 (order.getWorkerId() != null ? order.getWorkerId() : "0") + ":" +
                 order.getActualAmount() + ":" + (order.getSpuId() != null ? order.getSpuId() : "1");
         mqSender.send(MqConstants.SETTLEMENT_EXCHANGE, MqConstants.SETTLEMENT_SETTLE_KEY,
                 MqMessage.of("order.completed", settleData));
-        // 发通知
         mqSender.send(MqConstants.NOTIFY_EXCHANGE, "notify.inbox",
                 MqMessage.of("order.completed", orderNo + ":" + order.getUserId()));
     }
@@ -123,9 +134,11 @@ public class OrderService {
     @Transactional
     public void cancel(String orderNo, String reason) {
         Order order = getByOrderNo(orderNo);
+        String from = order.getStatus();
         order.cancel(reason);
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
+        saveLog(order, from, "取消: " + (reason != null ? reason : "用户取消"));
         redisTemplate.delete("order:detail:" + orderNo);
     }
 
@@ -133,10 +146,64 @@ public class OrderService {
     @Transactional
     public void applyRefund(String orderNo) {
         Order order = getByOrderNo(orderNo);
+        String fromStatus = order.getStatus();
         order.applyRefund();
         order.setUpdateTime(java.time.LocalDateTime.now());
         updateStatus(orderNo, order);
+        // 创建退款单
+        OrderRefund refund = new OrderRefund();
+        refund.setRefundId(idGenerator.nextId());
+        refund.setOrderId(order.getOrderId());
+        refund.setTenantId(order.getTenantId());
+        refund.setOrderNo(orderNo);
+        refund.setUserId(order.getUserId());
+        refund.setRefundAmount(order.getActualAmount());
+        refund.setReason("用户申请退款");
+        refund.setStatus("PENDING");
+        refund.setApplyTime(java.time.LocalDateTime.now());
+        refundMapper.insert(refund);
+        // 记录日志
+        saveLog(order, fromStatus, "用户申请退款");
         redisTemplate.delete("order:detail:" + orderNo);
+    }
+
+    // ===== 退款审核 =====
+
+    public List<OrderRefund> pendingRefunds() {
+        return refundMapper.selectList(
+                new LambdaQueryWrapper<OrderRefund>().eq(OrderRefund::getStatus, "PENDING"));
+    }
+
+    @Transactional
+    public void approveRefund(Long refundId) {
+        OrderRefund refund = refundMapper.selectById(refundId);
+        if (refund == null || !"PENDING".equals(refund.getStatus())) return;
+        refund.setStatus("APPROVED");
+        refund.setAuditTime(java.time.LocalDateTime.now());
+        refundMapper.updateById(refund);
+        // 更新订单状态为已退款
+        Order order = getByOrderNo(refund.getOrderNo());
+        String from = order.getStatus();
+        order.setStatus("REFUNDED");
+        order.setUpdateTime(java.time.LocalDateTime.now());
+        updateStatus(refund.getOrderNo(), order);
+        saveLog(order, from, "退款审核通过");
+    }
+
+    // ===== 内部辅助 =====
+
+    /** 记录状态变更日志 */
+    private void saveLog(Order order, String fromStatus, String remark) {
+        OrderLog log = new OrderLog();
+        log.setLogId(idGenerator.nextId());
+        log.setOrderId(order.getOrderId());
+        log.setTenantId(order.getTenantId());
+        log.setOrderNo(order.getOrderNo());
+        log.setFromStatus(fromStatus);
+        log.setToStatus(order.getStatus());
+        log.setRemark(remark);
+        log.setCreateTime(java.time.LocalDateTime.now());
+        logMapper.insert(log);
     }
 
     /** 精准更新状态（避开分片键，避免 ShardingSphere 拒绝） */
