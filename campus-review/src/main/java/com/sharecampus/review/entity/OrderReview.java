@@ -6,4 +6,5 @@ import lombok.Data; import lombok.EqualsAndHashCode;
 public class OrderReview extends BaseEntity {
     private Long orderId; private Long userId; private Long workerId;
     private Integer rating; private String content; private String images;
+    private String tags; // 快捷标签，逗号分隔 如 "服务好,速度快,态度好"
 }
