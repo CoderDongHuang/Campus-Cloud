@@ -107,6 +107,32 @@ public class SettlementService {
         return getOrCreateWallet(userId);
     }
 
+    /** 待审核提现列表 */
+    public List<WithdrawApply> pendingWithdraws() {
+        return withdrawMapper.selectList(
+                new LambdaQueryWrapper<WithdrawApply>()
+                        .eq(WithdrawApply::getStatus, "PENDING")
+                        .orderByDesc(WithdrawApply::getApplyTime));
+    }
+
+    /** 审核通过提现 */
+    @Transactional
+    public void approveWithdraw(Long id) {
+        WithdrawApply apply = withdrawMapper.selectById(id);
+        if (apply == null || !"PENDING".equals(apply.getStatus())) return;
+        apply.setStatus("APPROVED");
+        apply.setAuditTime(LocalDateTime.now());
+        withdrawMapper.updateById(apply);
+
+        WorkerWallet wallet = walletMapper.selectById(apply.getUserId());
+        if (wallet != null) {
+            wallet.setFrozenAmount(wallet.getFrozenAmount().subtract(apply.getAmount()));
+            wallet.setWithdrawnAmount(wallet.getWithdrawnAmount().add(apply.getAmount()));
+            walletMapper.updateById(wallet);
+        }
+        log.info("提现审核通过: withdrawNo={}, amount={}", apply.getWithdrawNo(), apply.getAmount());
+    }
+
     /** 收入明细 */
     public List<SettlementOrder> incomeList(Long userId) {
         return settlementOrderMapper.selectList(

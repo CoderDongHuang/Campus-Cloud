@@ -35,4 +35,16 @@ public class SettlementController {
         BigDecimal amount = new BigDecimal(body.get("amount").toString());
         return Result.success(settlementService.applyWithdraw(userId, amount));
     }
+
+    // ===== 运营端：提现审核 =====
+    @GetMapping("/admin/withdraws")
+    public Result<List<WithdrawApply>> pendingWithdraws() {
+        return Result.success(settlementService.pendingWithdraws());
+    }
+
+    @PutMapping("/admin/withdraws/{id}/approve")
+    public Result<Void> approveWithdraw(@PathVariable Long id) {
+        settlementService.approveWithdraw(id);
+        return Result.success();
+    }
 }

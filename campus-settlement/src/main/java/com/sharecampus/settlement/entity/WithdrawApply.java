@@ -7,5 +7,5 @@ import java.math.BigDecimal; import java.time.LocalDateTime;
 public class WithdrawApply extends BaseEntity {
     private String withdrawNo; private Long userId; private BigDecimal amount;
     private String channel; private String status;
-    private LocalDateTime applyTime; private LocalDateTime completeTime;
+    private LocalDateTime applyTime; private LocalDateTime auditTime; private LocalDateTime completeTime;
 }
