@@ -3,21 +3,17 @@ package com.sharecampus.order.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sharecampus.order.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
-/**
- * 订单 Mapper
- * <p>
- * ⚠️ 禁止使用 updateById(Order)：Order 在 ShardingSphere 分库分表下，
- * updateById 会 SET 分片键（order_id/tenant_id），被 Proxy 拒绝。
- * 必须使用 LambdaUpdateWrapper 精准更新，见 OrderService.updateStatus()。
- */
+import java.util.List;
+import java.util.Map;
+
 @Mapper
 public interface OrderMapper extends BaseMapper<Order> {
 
-    /**
-     * @deprecated 禁止使用！ShardingSphere 拒绝更新分片键。
-     * 使用 {@code orderMapper.update(null, new LambdaUpdateWrapper<Order>()...)} 代替。
-     */
+    @Select("SELECT worker_id, COUNT(*) AS order_count FROM t_order WHERE worker_id IS NOT NULL GROUP BY worker_id ORDER BY order_count DESC LIMIT 10")
+    List<Map<String, Object>> workerRanking();
+
     @Deprecated
     @Override
     default int updateById(Order entity) {

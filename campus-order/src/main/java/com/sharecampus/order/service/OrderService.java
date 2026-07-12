@@ -301,6 +301,10 @@ public class OrderService {
         log.info("定时任务完成: 取消 {} 笔超时订单", timeoutOrders.size());
     }
 
+    public java.util.List<java.util.Map<String, Object>> workerRanking() {
+        return orderMapper.workerRanking();
+    }
+
     // ===== 统计（给 data-service 调） =====
 
     public Map<String, Object> todayStats() {

@@ -56,6 +56,18 @@ public class OrderController {
     @PutMapping("/orders/{orderNo}/refund")
     public Result<Void> refund(@PathVariable String orderNo) { orderService.applyRefund(orderNo); return Result.success(); }
 
+    // ===== 退款审核（运营端） =====
+    @GetMapping("/admin/refunds")
+    public Result<java.util.List<com.sharecampus.order.entity.OrderRefund>> pendingRefunds() {
+        return Result.success(orderService.pendingRefunds());
+    }
+
+    @PutMapping("/admin/refunds/{refundId}/approve")
+    public Result<Void> approveRefund(@PathVariable Long refundId) {
+        orderService.approveRefund(refundId);
+        return Result.success();
+    }
+
     @PutMapping("/worker/orders/{orderNo}/accept")
     public Result<Void> accept(@PathVariable String orderNo) { orderService.accept(orderNo, userId()); return Result.success(); }
 
@@ -67,4 +79,9 @@ public class OrderController {
 
     @GetMapping("/stats/trend")
     public Result<Map<String, Object>> trend(@RequestParam(defaultValue = "week") String period) { return Result.success(orderService.trend(period)); }
+
+    @GetMapping("/stats/worker-ranking")
+    public Result<java.util.List<java.util.Map<String, Object>>> workerRanking() {
+        return Result.success(orderService.workerRanking());
+    }
 }
