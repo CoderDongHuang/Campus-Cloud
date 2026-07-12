@@ -60,4 +60,18 @@ public class UserController {
     public Result<WorkerCertification> certStatus() {
         return Result.success(userService.getCertStatus(userId()));
     }
+
+    // ===== 运营端：师傅审核 =====
+    @GetMapping("/admin/certifications")
+    public Result<List<WorkerCertification>> pendingCertifications() {
+        return Result.success(userService.pendingCertifications());
+    }
+
+    @PutMapping("/admin/certifications/{id}/audit")
+    public Result<Void> auditCert(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
+        Boolean approved = (Boolean) body.getOrDefault("approved", true);
+        String remark = (String) body.getOrDefault("remark", "");
+        userService.auditCertification(id, approved, remark);
+        return Result.success();
+    }
 }
