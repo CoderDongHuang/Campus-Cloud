@@ -31,6 +31,12 @@ public class ProductService {
     private final StringRedisTemplate redisTemplate;
     private final MqSender mqSender;
 
+    public List<ProductSpu> spuTop(int n) {
+        return spuMapper.selectList(
+                new LambdaQueryWrapper<ProductSpu>().eq(ProductSpu::getStatus, 1)
+                        .orderByDesc(ProductSpu::getSalesCount).last("LIMIT " + n));
+    }
+
     // ==================== 类目 ====================
 
     public List<ProductCategory> categoryTree() {

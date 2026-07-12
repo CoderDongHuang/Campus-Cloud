@@ -18,6 +18,11 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @GetMapping("/spu/top")
+    public Result<List<ProductSpu>> spuTop(@RequestParam(defaultValue = "5") int n) {
+        return Result.success(productService.spuTop(n));
+    }
+
     @GetMapping("/categories/tree")
     public Result<List<ProductCategory>> categoryTree() {
         return Result.success(productService.categoryTree());
