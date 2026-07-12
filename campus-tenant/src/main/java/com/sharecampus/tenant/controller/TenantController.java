@@ -24,6 +24,16 @@ public class TenantController {
     @GetMapping("/admin/list")
     public Result<List<Tenant>> listAll() { return Result.success(tenantService.listAll()); }
 
+    @GetMapping("/packages")
+    public Result<java.util.List<com.sharecampus.tenant.entity.TenantPackage>> listPackages() {
+        return Result.success(tenantService.listPackages());
+    }
+
+    @GetMapping("/usage")
+    public Result<Map<String, Object>> usage(@RequestHeader("X-Tenant-Id") Long tenantId) {
+        return Result.success(tenantService.getUsage(tenantId));
+    }
+
     @PutMapping("/admin/{id}/audit")
     public Result<Void> audit(@PathVariable Long id, @RequestBody Map<String, Boolean> body) { tenantService.audit(id, body.getOrDefault("approved", true)); return Result.success(); }
 

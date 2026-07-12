@@ -5,7 +5,9 @@ import com.sharecampus.common.core.exception.BizException;
 import com.sharecampus.common.core.exception.ErrorCode;
 import com.sharecampus.common.security.UserContext;
 import com.sharecampus.tenant.entity.Tenant;
+import com.sharecampus.tenant.entity.TenantPackage;
 import com.sharecampus.tenant.mapper.TenantMapper;
+import com.sharecampus.tenant.mapper.TenantPackageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.List;
 public class TenantService {
 
     private final TenantMapper tenantMapper;
+    private final TenantPackageMapper packageMapper;
 
     /** 学校注册 */
     public void register(Tenant tenant) {
@@ -48,6 +51,17 @@ public class TenantService {
     /** 租户列表（超管） */
     public List<Tenant> listAll() {
         return tenantMapper.selectList(new LambdaQueryWrapper<Tenant>().orderByDesc(Tenant::getCreateTime));
+    }
+
+    /** 套餐列表 */
+    public List<TenantPackage> listPackages() {
+        return packageMapper.selectList(null);
+    }
+
+    /** 租户用量概览 */
+    public java.util.Map<String, Object> getUsage(Long tenantId) {
+        long todayOrders = 0; // TODO: 从 order-service 查询
+        return java.util.Map.of("tenantId", tenantId, "todayOrders", todayOrders, "storageUsedMb", 0);
     }
 
     /** 变更租户状态 */

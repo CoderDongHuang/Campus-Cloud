@@ -78,4 +78,18 @@ public class UserService {
                         .orderByDesc(WorkerCertification::getCreateTime)
                         .last("LIMIT 1"));
     }
+
+    public List<WorkerCertification> pendingCertifications() {
+        return certMapper.selectList(
+                new LambdaQueryWrapper<WorkerCertification>().eq(WorkerCertification::getStatus, 0));
+    }
+
+    @Transactional
+    public void auditCertification(Long id, Boolean approved, String remark) {
+        WorkerCertification cert = certMapper.selectById(id);
+        if (cert == null) throw new BizException(ErrorCode.NOT_FOUND);
+        cert.setStatus(approved ? 1 : 2);
+        cert.setAuditRemark(remark);
+        certMapper.updateById(cert);
+    }
 }
