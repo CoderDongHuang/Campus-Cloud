@@ -131,3 +131,18 @@ knife4j:
     discover:
       enabled: true
       version: openapi3
+
+# Sentinel 限流熔断
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:18080
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            data-id: campus-gateway-sentinel
+            group-id: DEFAULT_GROUP
+            data-type: json
+            rule-type: gw-flow
