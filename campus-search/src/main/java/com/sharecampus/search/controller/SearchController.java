@@ -21,4 +21,9 @@ public class SearchController {
                                            @RequestParam(defaultValue = "20") int size) throws Exception {
         return Result.success(searchService.search(keyword, page, size, tenantId));
     }
+
+    @GetMapping("/hot-keywords")
+    public Result<java.util.List<String>> hotKeywords() {
+        return Result.success(searchService.hotKeywords(10));
+    }
 }

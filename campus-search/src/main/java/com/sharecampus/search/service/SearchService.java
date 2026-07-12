@@ -48,6 +48,12 @@ public class SearchService {
                 .collect(Collectors.toList());
     }
 
+    /** 热搜词 TOP N */
+    public java.util.List<String> hotKeywords(int topN) {
+        var set = redisTemplate.opsForZSet().reverseRange("hot:search", 0, topN - 1);
+        return set != null ? new java.util.ArrayList<>(set) : java.util.Collections.emptyList();
+    }
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /** Canal binlog同步消费者 — 处理Canal原生flatMessage格式 */
