@@ -3,6 +3,7 @@ package com.sharecampus.notify.controller;
 import com.sharecampus.common.core.model.Result;
 import com.sharecampus.common.security.UserContext;
 import com.sharecampus.notify.entity.MessageRecord;
+import com.sharecampus.notify.entity.UserMessage;
 import com.sharecampus.notify.service.NotifyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,5 +20,12 @@ public class NotifyController {
     @GetMapping("/messages")
     public Result<List<MessageRecord>> myMessages(@RequestHeader("X-User-Id") Long userId) {
         return Result.success(notifyService.myMessages(userId));
+    }
+
+    @GetMapping("/inbox")
+    public Result<List<UserMessage>> myInbox(@RequestHeader("X-User-Id") Long userId,
+                                              @RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "20") int size) {
+        return Result.success(notifyService.myInbox(userId, page, size));
     }
 }
