@@ -45,4 +45,12 @@ public class ReconciliationService {
 
         log.info("===== 每日对账完成: 异常分账单 {} 笔 =====", staleList.size());
     }
+
+    /** 券库存对账：Redis vs MySQL 差异扫描 */
+    @com.xxl.job.core.handler.annotation.XxlJob("couponReconciliationCheck")
+    public void couponReconciliationCheck() {
+        log.info("===== 券库存对账开始 =====");
+        // TODO: 读取 coupon_stock 表 vs Redis coupon:stock:* 比对差异
+        log.info("===== 券库存对账完成 =====");
+    }
 }
