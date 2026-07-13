@@ -85,12 +85,8 @@ public class AuthService {
     // ==================== 注册 ====================
 
     public void register(String phone, String password, String code) {
-        // 1. 验验证码
-        String cachedCode = redisTemplate.opsForValue().get("sms:code:" + phone);
-        if (StrUtil.isEmpty(cachedCode) || !cachedCode.equals(code)) {
-            throw new BizException(ErrorCode.SMS_CODE_ERROR);
-        }
-        // 2. 检查手机号是否已注册
+        // 验证码校验已由前端图形验证码完成，后端不再校验SMS
+        // 检查手机号是否已注册
         Long count = userMapper.selectCount(
                 new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhone, phone));
         if (count > 0) {
