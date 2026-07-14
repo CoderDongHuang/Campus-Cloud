@@ -1,93 +1,77 @@
 # ==================== Gateway 本地配置 ====================
-# 可被 Nacos 配置中心覆盖
-
 server:
   port: 8080
 
 spring:
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
       discovery:
         locator:
-          enabled: true           # 自动从 Nacos 发现服务
-          lower-case-service-id: true
+          enabled: false
       routes:
-        # ===== 认证服务 =====
         - id: campus-auth
           uri: lb://campus-auth
           predicates:
             - Path=/api/v1/auth/**
-        # ===== 用户服务 =====
         - id: campus-user
           uri: lb://campus-user
           predicates:
             - Path=/api/v1/user/**
-        # ===== 商品服务 =====
         - id: campus-product
           uri: lb://campus-product
           predicates:
             - Path=/api/v1/product/**
-        # ===== 订单服务 =====
         - id: campus-order
           uri: lb://campus-order
           predicates:
             - Path=/api/v1/order/**
-        # ===== 支付服务 =====
         - id: campus-payment
           uri: lb://campus-payment
           predicates:
             - Path=/api/v1/payment/**
-        # ===== 优惠券服务 =====
         - id: campus-coupon
           uri: lb://campus-coupon
           predicates:
             - Path=/api/v1/coupon/**
-        # ===== 结算服务 =====
         - id: campus-settlement
           uri: lb://campus-settlement
           predicates:
             - Path=/api/v1/settlement/**
-        # ===== 搜索服务 =====
         - id: campus-search
           uri: lb://campus-search
           predicates:
             - Path=/api/v1/search/**
-        # ===== IM 服务 =====
         - id: campus-im
           uri: lb://campus-im
           predicates:
             - Path=/api/v1/im/**
-        # IM WebSocket（需要协议升级）
         - id: campus-im-ws
           uri: lb://campus-im
           predicates:
             - Path=/ws/**
-        # ===== 通知服务 =====
         - id: campus-notify
           uri: lb://campus-notify
           predicates:
             - Path=/api/v1/notify/**
-        # ===== 评价服务 =====
         - id: campus-review
           uri: lb://campus-review
           predicates:
             - Path=/api/v1/review/**
-        # ===== 文件服务 =====
         - id: campus-file
           uri: lb://campus-file
           predicates:
             - Path=/api/v1/file/**
-        # ===== 数据服务 =====
         - id: campus-data
           uri: lb://campus-data
           predicates:
             - Path=/api/v1/data/**
-        # ===== 租户服务 =====
         - id: campus-tenant
-          uri: http://localhost:8088
+          uri: lb://campus-tenant
           predicates:
             - Path=/api/v1/tenant/**
-      # CORS 全局配置（生产环境需改为具体前端域名）
       globalcors:
         cors-configurations:
           '[/**]':
@@ -95,20 +79,7 @@ spring:
             allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
             allowedHeaders: "*"
             allowCredentials: true
-      # Sentinel 网关限流
-      sentinel:
-        transport:
-          dashboard: localhost:18080
-        datasource:
-          ds1:
-            nacos:
-              server-addr: localhost:8848
-              data-id: campus-gateway-sentinel
-              group-id: DEFAULT_GROUP
-              data-type: json
-              rule-type: gw-flow
 
-# ==================== 网关白名单 ====================
 campus:
   security:
     white-urls:
@@ -119,6 +90,7 @@ campus:
       - /api/v1/product/**
       - /doc.html
       - /v3/api-docs/**
+      - /actuator/**
 
 management:
   endpoints:
@@ -126,7 +98,6 @@ management:
       exposure:
         include: health,info,prometheus
 
-# ==================== Knife4j 聚合文档 ====================
 knife4j:
   gateway:
     enabled: true
@@ -134,5 +105,3 @@ knife4j:
     discover:
       enabled: true
       version: openapi3
-
-# Sentinel 限流熔断（已合并到上方 spring.cloud 块）

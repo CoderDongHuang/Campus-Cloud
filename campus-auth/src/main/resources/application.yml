@@ -4,15 +4,15 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/campus_user?useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://127.0.0.1:3307/campus_user?useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: ***REMOVED***
+    password: ${DB_PASSWORD}
     type: com.alibaba.druid.pool.DruidDataSource
   data:
     redis:
       host: localhost
       port: 6379
-      password: ***REMOVED***
+      password: ${REDIS_PASSWORD}
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

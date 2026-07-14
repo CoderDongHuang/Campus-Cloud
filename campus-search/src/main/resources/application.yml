@@ -6,12 +6,12 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: ***REMOVED***
+      password: ${REDIS_PASSWORD}
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
-    password: guest
+    password: ${MQ_PASSWORD}
 
 management:
   endpoints:

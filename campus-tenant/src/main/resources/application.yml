@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/campus_tenant?useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: ***REMOVED***
+    password: ${DB_PASSWORD}
     type: com.alibaba.druid.pool.DruidDataSource
 
 management:

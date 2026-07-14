@@ -17,4 +17,4 @@ spring:
 
 jasypt:
   encryptor:
-    password: ***REMOVED***
+    password: ${JASYPT_PASSWORD}

@@ -103,8 +103,8 @@ spec:
 # Secret 模板（实际值通过 kubectl create secret 注入，不写入仓库）
 # kubectl create secret generic campus-cloud-secrets \
 #   --from-literal=DB_USER=root \
-#   --from-literal=DB_PASS=***REMOVED*** \
-#   --from-literal=REDIS_PASS=***REMOVED*** \
-#   --from-literal=MQ_USER=guest \
+#   --from-literal=DB_PASS=${DB_PASSWORD} \
+#   --from-literal=REDIS_PASS=${REDIS_PASSWORD} \
+#   --from-literal=MQ_USER=${MQ_USER} \
 #   --from-literal=MQ_PASS=guest \
 #   -n campus-cloud

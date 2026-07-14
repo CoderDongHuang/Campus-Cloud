@@ -49,6 +49,9 @@ application-dev.yml
 *.pem
 credentials.json
 secrets/
+.env
+.env.local
+*.env.local
 
 # ==================== Node (if any) ====================
 node_modules/
