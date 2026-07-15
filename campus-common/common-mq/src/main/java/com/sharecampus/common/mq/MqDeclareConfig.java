@@ -56,6 +56,11 @@ public class MqDeclareConfig {
     @Bean public Binding imMessageBinding() { return BindingBuilder.bind(imMessageQueue()).to(imExchange()).with(MqConstants.IM_MESSAGE_KEY); }
     @Bean public Binding imSystemBinding() { return BindingBuilder.bind(imSystemQueue()).to(imExchange()).with(MqConstants.IM_SYSTEM_KEY); }
 
+    // ===== 死信队列（消费失败3次后进入DLQ，人工处理） =====
+    @Bean public TopicExchange deadLetterExchange() { return new TopicExchange("dead.letter.exchange"); }
+    @Bean public Queue deadLetterQueue() { return new Queue("dead.letter.queue", true); }
+    @Bean public Binding deadLetterBinding() { return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with("dead.letter.#"); }
+
     // ===== 数据同步(Canal) =====
     @Bean public DirectExchange canalSyncExchange() { return new DirectExchange("canal.sync.exchange"); }
     @Bean public Binding canalSyncBinding() { return BindingBuilder.bind(dbSyncProductQueue()).to(canalSyncExchange()).with("canal.sync.routing.key"); }

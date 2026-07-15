@@ -1,0 +1,18 @@
+{
+  "name": "campus-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "校享云 - 前端 monorepo",
+  "scripts": {
+    "dev:admin": "pnpm --filter campus-admin dev",
+    "dev:h5": "pnpm --filter campus-h5 dev",
+    "build:admin": "pnpm --filter campus-admin build",
+    "build:h5": "pnpm --filter campus-h5 build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  }
+}
