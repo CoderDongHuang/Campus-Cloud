@@ -6,6 +6,7 @@ import com.sharecampus.common.core.exception.ErrorCode;
 import com.sharecampus.common.security.UserContext;
 import com.sharecampus.tenant.entity.Tenant;
 import com.sharecampus.tenant.entity.TenantPackage;
+import com.sharecampus.tenant.feign.OrderFeignClient;
 import com.sharecampus.tenant.mapper.TenantMapper;
 import com.sharecampus.tenant.mapper.TenantPackageMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class TenantService {
 
     private final TenantMapper tenantMapper;
     private final TenantPackageMapper packageMapper;
+    private final OrderFeignClient orderFeignClient;
 
     /** 学校注册 */
     public void register(Tenant tenant) {
@@ -58,9 +60,17 @@ public class TenantService {
         return packageMapper.selectList(null);
     }
 
-    /** 租户用量概览 */
+    /** 租户用量概览（Feign 查 order-service 获取今日订单量） */
     public java.util.Map<String, Object> getUsage(Long tenantId) {
-        long todayOrders = 0; // TODO: 从 order-service 查询
+        long todayOrders = 0;
+        try {
+            var result = orderFeignClient.tenantTodayOrders(tenantId);
+            if (result != null && result.getData() != null) {
+                todayOrders = result.getData();
+            }
+        } catch (Exception e) {
+            log.warn("查询租户今日订单量失败(降级为0): tenantId={}", tenantId, e);
+        }
         return java.util.Map.of("tenantId", tenantId, "todayOrders", todayOrders, "storageUsedMb", 0);
     }
 

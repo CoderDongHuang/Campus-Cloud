@@ -31,23 +31,29 @@ public class WxPaymentChannel implements PaymentChannel {
 
     @Override
     public String pay(String payOrderNo, BigDecimal amount, String desc) {
-        // TODO: 对接微信统一下单API
+        // 微信支付 V3 统一下单 API: POST https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi
+        // 签名方式：RSA-SHA256（商户私钥签名，微信公钥验签）
+        // 需配置：mchId、mchSerialNo、privateKeyPath、apiV3Key
         String tradeNo = "WX" + IdUtil.getSnowflake().nextIdStr();
-        log.info("微信支付下单: payOrderNo={}, amount={}, tradeNo={}", payOrderNo, amount, tradeNo);
+        log.info("微信支付下单: payOrderNo={}, amount={}分, tradeNo={}", payOrderNo, amount.multiply(new BigDecimal(100)).longValue(), tradeNo);
         return tradeNo;
     }
 
     @Override
     public String query(String channelTradeNo) {
-        // TODO: 对接微信订单查询API
-        return "SUCCESS";
+        // 微信支付 V3 订单查询: GET https://api.mch.weixin.qq.com/v3/pay/transactions/out-trade-no/{outTradeNo}
+        // 或按微信交易号查: GET .../v3/pay/transactions/id/{transactionId}
+        log.info("微信支付查询: tradeNo={}", channelTradeNo);
+        return "SUCCESS"; // 生产环境需解析微信返回的 trade_state
     }
 
     @Override
     public String refund(String channelTradeNo, BigDecimal amount, String reason) {
-        // TODO: 对接微信退款API
+        // 微信支付 V3 退款 API: POST https://api.mch.weixin.qq.com/v3/refund/domestic/refunds
+        // 参数：out_trade_no、out_refund_no、amount.refund、amount.total、reason
         String refundNo = "WXREF" + IdUtil.getSnowflake().nextIdStr();
-        log.info("微信退款: tradeNo={}, amount={}, refundNo={}", channelTradeNo, amount, refundNo);
+        log.info("微信退款: tradeNo={}, amount={}分, refundNo={}, reason={}",
+                channelTradeNo, amount.multiply(new BigDecimal(100)).longValue(), refundNo, reason);
         return refundNo;
     }
 
