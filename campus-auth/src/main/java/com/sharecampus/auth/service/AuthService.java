@@ -84,7 +84,7 @@ public class AuthService {
 
     // ==================== 注册 ====================
 
-    public void register(String phone, String password, String code) {
+    public void register(String phone, String password, String code, String userType) {
         // 验证码校验已由前端图形验证码完成，后端不再校验SMS
         // 检查手机号是否已注册
         Long count = userMapper.selectCount(
@@ -92,12 +92,12 @@ public class AuthService {
         if (count > 0) {
             throw new BizException(ErrorCode.PHONE_ALREADY_EXISTS);
         }
-        // 3. 创建用户
+        // 创建用户
         SysUser user = new SysUser();
         user.setPhone(phone);
         user.setPassword(passwordEncoder.encode(password));
         user.setNickname("用户" + phone.substring(7));
-        user.setUserType("STUDENT");
+        user.setUserType(userType != null && !userType.isEmpty() ? userType.toUpperCase() : "STUDENT");
         user.setStatus(1);
         userMapper.insert(user);
 

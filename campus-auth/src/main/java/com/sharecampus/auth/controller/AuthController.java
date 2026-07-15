@@ -36,7 +36,8 @@ public class AuthController {
     /** 注册 */
     @PostMapping("/register")
     public Result<Void> register(@RequestBody Map<String, String> body) {
-        authService.register(body.get("phone"), body.get("password"), body.get("code"));
+        authService.register(body.get("phone"), body.get("password"), body.get("code"),
+                body.getOrDefault("userType", "STUDENT"));
         return Result.success();
     }
 
