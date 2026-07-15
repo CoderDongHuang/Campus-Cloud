@@ -97,7 +97,7 @@ async function register() {
   if (regCaptchaInput.value.toUpperCase() !== captchaCode.value) { errorMsg.value = '验证码错误'; generateCaptcha(); regCaptchaInput.value = ''; return }
   loading.value = true
   try {
-    const res = await axios.post('/api/v1/auth/register', { phone: regPhone.value, password: regPassword.value, code: '' })
+    const res = await axios.post('/api/v1/auth/register', { phone: regPhone.value, password: regPassword.value, code: '', userType: role.value === 'student' ? 'STUDENT' : role.value === 'worker' ? 'WORKER' : 'ADMIN' })
     if (res.data.code === 200) { mode.value = 'signin'; account.value = regPhone.value; errorMsg.value = ''; generateCaptcha() }
     else { errorMsg.value = res.data.message || '注册失败' }
   } catch (e: any) { errorMsg.value = e?.response?.data?.message || '注册失败，手机号可能已注册' }
@@ -152,7 +152,7 @@ onMounted(() => generateCaptcha())
         </div>
         <p v-if="errorMsg" class="err">{{ errorMsg }}</p>
         <button type="submit" class="btn" :disabled="loading">{{ loading ? '...' : currentRole.btn }}</button>
-        <p class="tip">13800000000 / admin123</p>
+        <p class="tip">编程星辰海 / CoderDongHuang</p>
       </form>
 
       <!-- ====== 注册 ====== -->
@@ -184,7 +184,8 @@ onMounted(() => generateCaptcha())
     </div>
 
     <footer class="foot">
-      <span>15 微服务</span><span>/</span><span>ShardingSphere</span><span>/</span><span>Canal + ES</span><span>/</span><span>SSL</span>
+      <div>学生&nbsp;~&nbsp;师傅&nbsp;~&nbsp;校方</div>
+      <div>&copy; 2026 校享云. All rights reserved.&nbsp;&nbsp;&nbsp;&nbsp;<a href="/privacy" target="_blank">隐私政策</a>&nbsp;&nbsp;<a href="/terms" target="_blank">用户协议</a></div>
     </footer>
   </div>
 </template>
@@ -246,5 +247,10 @@ onMounted(() => generateCaptcha())
 
 .locked { text-align: center; color: #ccc; padding: 20px 0; }
 .tip { text-align: center; font-size: 12px; color: #ddd; }
-.foot { padding: 20px; font-size: 11px; color: #ddd; display: flex; gap: 8px; justify-content: center; }
+.foot { padding:20px 28px; width:100%; text-align:center; font-size:12px; color:#bbb; line-height:2 }
+.foot a { color:#bbb; text-decoration:none }
+.foot a:hover { color:#999 }
+.foot-links { display:flex; gap:16px }
+.foot-links a { color:#ccc; text-decoration:none }
+.foot-links a:hover { color:#999 }
 </style>

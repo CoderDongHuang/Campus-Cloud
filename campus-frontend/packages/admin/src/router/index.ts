@@ -10,6 +10,12 @@ const router = createRouter({
       meta: { title: '登录' },
     },
     {
+      path: '/privacy', name: 'Privacy', component: () => import('@/views/privacy.vue'), meta: { title: '隐私政策' },
+    },
+    {
+      path: '/terms', name: 'Terms', component: () => import('@/views/terms.vue'), meta: { title: '用户协议' },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/DefaultLayout.vue'),
       redirect: '/dashboard',

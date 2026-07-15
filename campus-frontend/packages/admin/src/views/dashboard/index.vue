@@ -7,14 +7,16 @@ const topServices = ref<Array<{name:string, salesCount:number}>>([])
 const workerRanking = ref<Array<{worker_id:number, order_count:number}>>([])
 
 onMounted(async () => {
-  const [overview, top, ranking] = await Promise.all([
-    axios.get('/api/v1/data/dashboard/overview'),
-    axios.get('/api/v1/product/spu/top?n=5'),
-    axios.get('/api/v1/order/stats/worker-ranking'),
-  ])
-  stats.value = overview.data.data
-  topServices.value = top.data.data
-  workerRanking.value = ranking.data.data
+  try {
+    const [overview, top, ranking] = await Promise.all([
+      axios.get('/api/v1/data/dashboard/overview'),
+      axios.get('/api/v1/product/spu/top?n=5'),
+      axios.get('/api/v1/order/stats/worker-ranking'),
+    ])
+    stats.value = overview.data.data
+    topServices.value = top.data.data
+    workerRanking.value = ranking.data.data
+  } catch { /* 后端未启动时静默降级 */ }
 })
 </script>
 
