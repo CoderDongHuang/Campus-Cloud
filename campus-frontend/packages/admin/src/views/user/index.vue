@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 
 const certifications = ref<any[]>([])
 async function fetch() {
-  try { const res = await axios.get('/api/v1/user/admin/certifications'); certifications.value = res.data.data || [] } catch {}
+  try { const res = await http.get('/api/v1/user/admin/certifications'); certifications.value = res.data.data || [] } catch {}
 }
 async function audit(id: number, approved: boolean) {
-  await axios.put(`/api/v1/user/admin/certifications/${id}/audit`, { approved })
+  await http.put(`/api/v1/user/admin/certifications/${id}/audit`, { approved })
   ElMessage.success(approved ? '审核通过' : '已驳回')
   fetch()
 }

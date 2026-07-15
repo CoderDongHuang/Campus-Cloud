@@ -32,8 +32,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> whiteUrls = java.util.List.of(
         "/api/v1/auth/login", "/api/v1/auth/login/sms", "/api/v1/auth/register",
-        "/api/v1/auth/sms/send", "/api/v1/product/**", "/doc.html", "/v3/api-docs/**",
-        "/ws/**", "/actuator/health"
+        "/api/v1/auth/refresh", "/api/v1/auth/sms/send", "/api/v1/product/**",
+        "/doc.html", "/v3/api-docs/**", "/ws/**", "/actuator/health"
     );
 
     public AuthGlobalFilter(JwtTokenProvider jwtTokenProvider) {

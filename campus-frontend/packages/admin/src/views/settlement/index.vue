@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 
 const withdraws = ref<any[]>([])
 async function fetch() {
-  try { const res = await axios.get('/api/v1/settlement/admin/withdraws'); withdraws.value = res.data.data || [] } catch {}
+  try { const res = await http.get('/api/v1/settlement/admin/withdraws'); withdraws.value = res.data.data || [] } catch {}
 }
 async function approve(id: number) {
-  await axios.put(`/api/v1/settlement/admin/withdraws/${id}/approve`)
+  await http.put(`/api/v1/settlement/admin/withdraws/${id}/approve`)
   ElMessage.success('提现审核通过')
   fetch()
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 
 const orders = ref<any[]>([])
@@ -11,8 +11,8 @@ async function fetchOrders() {
   loading.value = true
   try {
     const [oRes, rRes] = await Promise.all([
-      axios.get('/api/v1/order/orders', { params: { page: 1, size: 50 } }),
-      axios.get('/api/v1/order/admin/refunds'),
+      http.get('/api/v1/order/orders', { params: { page: 1, size: 50 } }),
+      http.get('/api/v1/order/admin/refunds'),
     ])
     orders.value = oRes.data.data || []
     refunds.value = rRes.data.data || []
@@ -21,7 +21,7 @@ async function fetchOrders() {
 }
 
 async function approveRefund(refundId: number) {
-  await axios.put(`/api/v1/order/admin/refunds/${refundId}/approve`)
+  await http.put(`/api/v1/order/admin/refunds/${refundId}/approve`)
   ElMessage.success('退款已通过')
   fetchOrders()
 }

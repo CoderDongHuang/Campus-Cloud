@@ -57,7 +57,7 @@ async function login() {
     if (ut === 'STUDENT' || ut === 'WORKER') {
       const target = ut === 'STUDENT' ? 'http://localhost:3001/student' : 'http://localhost:3001/worker'
       window.location.href = target + '?token=' + encodeURIComponent(d.accessToken)
-    } else { setTimeout(() => router.push('/dashboard'), 300) }
+    } else { loading.value = false; setTimeout(() => router.push('/dashboard'), 300) }
   } catch (e: any) {
     const code = e?.response?.data?.code
     const map: Record<number,string> = { 1001:'用户不存在，请检查账号', 1002:'密码错误', 1006:'账号已被禁用' }
@@ -97,7 +97,7 @@ async function register() {
   if (regCaptchaInput.value.toUpperCase() !== captchaCode.value) { errorMsg.value = '验证码错误'; generateCaptcha(); regCaptchaInput.value = ''; return }
   loading.value = true
   try {
-    const res = await axios.post('/api/v1/auth/register', { phone: regPhone.value, password: regPassword.value, code: '', userType: role.value === 'student' ? 'STUDENT' : role.value === 'worker' ? 'WORKER' : 'ADMIN' })
+    const res = await axios.post('/api/v1/auth/register', { phone: regPhone.value, password: regPassword.value, code: '', userType: activeRole.value === 'student' ? 'STUDENT' : activeRole.value === 'worker' ? 'WORKER' : 'ADMIN' })
     if (res.data.code === 200) { mode.value = 'signin'; account.value = regPhone.value; errorMsg.value = ''; generateCaptcha() }
     else { errorMsg.value = res.data.message || '注册失败' }
   } catch (e: any) { errorMsg.value = e?.response?.data?.message || '注册失败，手机号可能已注册' }

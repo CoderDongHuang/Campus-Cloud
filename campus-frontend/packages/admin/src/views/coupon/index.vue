@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 
 const templates = ref<any[]>([])
@@ -8,11 +8,11 @@ const dialogVisible = ref(false)
 const form = ref({ name: '', discountValue: 10, useThreshold: 50, totalStock: 100, validDays: 7, status: 1 })
 
 async function fetchTemplates() {
-  try { const res = await axios.get('/api/v1/coupon/admin/templates'); templates.value = res.data.data || [] } catch { /* 降级 */ }
+  try { const res = await http.get('/api/v1/coupon/admin/templates'); templates.value = res.data.data || [] } catch { /* 降级 */ }
 }
 async function createTemplate() {
   if (!form.value.name) { ElMessage.warning('请输入券名称'); return }
-  await axios.post('/api/v1/coupon/admin/template', form.value)
+  await http.post('/api/v1/coupon/admin/template', form.value)
   ElMessage.success('券模板创建成功')
   dialogVisible.value = false
   fetchTemplates()

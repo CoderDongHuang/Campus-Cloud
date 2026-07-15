@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 
 const categories = ref<any[]>([])
@@ -11,16 +11,16 @@ const dialogVisible = ref(false)
 const form = ref({ name: '', description: '', categoryId: null as any, status: 1, salesCount: 0 })
 
 async function fetchCategories() {
-  try { const res = await axios.get('/api/v1/product/categories/tree'); categories.value = res.data.data } catch { /* 降级 */ }
+  try { const res = await http.get('/api/v1/product/categories/tree'); categories.value = res.data.data } catch { /* 降级 */ }
 }
 async function fetchSpu() {
   loading.value = true
-  try { const res = await axios.get('/api/v1/product/spu/list', { params: { keyword: keyword.value || undefined } }); spuList.value = res.data.data } catch { /* 降级 */ }
+  try { const res = await http.get('/api/v1/product/spu/list', { params: { keyword: keyword.value || undefined } }); spuList.value = res.data.data } catch { /* 降级 */ }
   loading.value = false
 }
 async function saveSpu() {
   if (!form.value.name) { ElMessage.warning('请输入商品名称'); return }
-  await axios.post('/api/v1/product/admin/spu', form.value)
+  await http.post('/api/v1/product/admin/spu', form.value)
   ElMessage.success('创建成功')
   dialogVisible.value = false
   form.value = { name: '', description: '', categoryId: null, status: 1, salesCount: 0 }
@@ -28,7 +28,7 @@ async function saveSpu() {
 }
 async function toggleStatus(row: any) {
   const newStatus = row.status === 1 ? 0 : 1
-  await axios.put(`/api/v1/product/admin/spu/${row.id}/status`, { status: newStatus })
+  await http.put(`/api/v1/product/admin/spu/${row.id}/status`, { status: newStatus })
   ElMessage.success(newStatus ? '已上架' : '已下架')
   fetchSpu()
 }

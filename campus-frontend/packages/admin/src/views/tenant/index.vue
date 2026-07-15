@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 const tenants = ref<any[]>([])
 const packages = ref<any[]>([])
 onMounted(async () => {
-  try { const [t,p] = await Promise.all([axios.get('/api/v1/tenant/admin/list'), axios.get('/api/v1/tenant/packages')]); tenants.value = t.data.data || []; packages.value = p.data.data || [] } catch {}
+  try { const [t,p] = await Promise.all([http.get('/api/v1/tenant/admin/list'), http.get('/api/v1/tenant/packages')]); tenants.value = t.data.data || []; packages.value = p.data.data || [] } catch {}
 })
 </script>
 <template>

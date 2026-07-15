@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 import { ElMessage } from 'element-plus'
 const reviews = ref<any[]>([])
-async function fetch() { try { const res = await axios.get('/api/v1/review/admin/pending'); reviews.value = res.data.data || [] } catch {} }
-async function approve(id: number) { await axios.put(`/api/v1/review/admin/reviews/${id}/approve`); ElMessage.success('审核通过'); fetch() }
+async function fetch() { try { const res = await http.get('/api/v1/review/admin/pending'); reviews.value = res.data.data || [] } catch {} }
+async function approve(id: number) { await http.put(`/api/v1/review/admin/reviews/${id}/approve`); ElMessage.success('审核通过'); fetch() }
 onMounted(fetch)
 </script>
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@shared/utils/request'
 const messages = ref<any[]>([])
-onMounted(async () => { try { const res = await axios.get('/api/v1/notify/inbox', { headers: { 'X-User-Id': '2073005678401105922' }, params: { page: 1, size: 20 } }); messages.value = res.data.data || [] } catch {} })
+onMounted(async () => { try { const res = await http.get('/api/v1/notify/inbox', { params: { page: 1, size: 20 } }); messages.value = res.data.data || [] } catch {} })
 </script>
 <template>
   <div><div class="ph"><h2>通知管理</h2></div>
